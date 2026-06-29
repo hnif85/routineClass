@@ -13,7 +13,7 @@ export default function MaterialsPage() {
 
   // ── Create / Edit modal ──
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<"ai" | "preview" | "detail">("ai");
+  const [modalMode, setModalMode] = useState<"ai" | "preview" | "detail" | "upload-preview">("ai");
   const [editId, setEditId] = useState<string | null>(null);
 
   // AI form
@@ -28,7 +28,17 @@ export default function MaterialsPage() {
   const [manualTitle, setManualTitle] = useState("");
   const [manualDesc, setManualDesc] = useState("");
   const [manualDays, setManualDays] = useState(1);
-  const [mode, setMode] = useState<"choose" | "ai" | "manual">("choose");
+
+  // Upload / Copy-Paste form
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDesc, setUploadDesc] = useState("");
+  const [uploadDays, setUploadDays] = useState(1);
+  const [uploadRaw, setUploadRaw] = useState("");
+  const [uploadFileName, setUploadFileName] = useState("");
+  const [uploadGenerating, setUploadGenerating] = useState(false);
+  const [uploadResult, setUploadResult] = useState<any>(null);
+
+  const [mode, setMode] = useState<"choose" | "ai" | "manual" | "upload">("choose");
 
   useEffect(() => { loadMaterials(); }, []);
 
@@ -119,6 +129,81 @@ export default function MaterialsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  // ── Upload / Copy-Paste handlers ──
+  function handleFileSelect(file: File) {
+    setUploadFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (text) setUploadRaw(text);
+    };
+    reader.readAsText(file);
+  }
+
+  async function analyzeUploadedContent() {
+    if (!uploadTitle.trim()) { toast.error("Judul harus diisi"); return; }
+    if (!uploadRaw.trim()) { toast.error("Konten harus diisi atau upload file"); return; }
+    setUploadGenerating(true);
+    setUploadResult(null);
+    try {
+      const res = await fetch("/api/analyze-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: uploadTitle,
+          description: uploadDesc,
+          raw_content: uploadRaw,
+          days: uploadDays,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Gagal menganalisis");
+      setUploadResult(json);
+      setModalMode("upload-preview");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setUploadGenerating(false);
+    }
+  }
+
+  async function saveUploadedMaterial() {
+    setSaving(true);
+    try {
+      const content = [{ day: 1, title: `Hari 1: ${uploadTitle}`, body: uploadRaw }];
+      const payload = {
+        title: uploadTitle,
+        description: uploadDesc,
+        content,
+        total_days: uploadDays,
+        syllabus: [{ day: 1, topic: uploadTitle, duration: `${uploadDays * 1.5} jam` }],
+        is_ai_generated: false,
+        test_data: { pre_test: uploadResult.pre_test || [], post_test: uploadResult.post_test || [] },
+      };
+      const { error } = await s.from("materials").insert(payload);
+      if (error) throw error;
+      toast.success("Materi berhasil disimpan!");
+      setShowModal(false);
+      resetUploadState();
+      loadMaterials();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function resetUploadState() {
+    setUploadTitle("");
+    setUploadDesc("");
+    setUploadDays(1);
+    setUploadRaw("");
+    setUploadFileName("");
+    setUploadResult(null);
+    setModalMode("ai");
+    setMode("choose");
   }
 
   const filtered = materials.filter(m =>
@@ -340,14 +425,30 @@ export default function MaterialsPage() {
                   {/* AI */}
                   <div style={{ border: '1px solid var(--border)', borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
-                      <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Buat dengan AI (DeepSeek)</h4>
+                      <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Buat dengan AI</h4>
                     </div>
                     <div style={{ padding: 14 }}>
                       <p style={{ fontSize: 12.5, color: '#73837A', marginBottom: 10 }}>
-                        AI akan meneliti topik dan menghasilkan materi lengkap + silabus.
+                        AI akan meneliti topik dan menghasilkan materi lengkap + silabus + pre/post test.
                       </p>
                       <button onClick={() => setMode("ai")}
                         className="btn btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}>
+                        Lanjutkan →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Upload / Copy-Paste → AI Test */}
+                  <div style={{ border: '1px solid var(--border)', borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
+                      <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Upload / Copy-Paste</h4>
+                    </div>
+                    <div style={{ padding: 14 }}>
+                      <p style={{ fontSize: 12.5, color: '#73837A', marginBottom: 10 }}>
+                        Upload file teks atau copy-paste konten materi Anda. AI akan memeriksa dan membuat pre/post test.
+                      </p>
+                      <button onClick={() => setMode("upload")}
+                        className="btn" style={{ padding: '8px 16px', fontSize: 13 }}>
                         Lanjutkan →
                       </button>
                     </div>
@@ -432,6 +533,226 @@ export default function MaterialsPage() {
                     }}>
                     ← Kembali
                   </button>
+                </div>
+              )}
+
+              {/* ── Upload / Copy-Paste mode ── */}
+              {modalMode !== "detail" && mode === "upload" && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Judul Materi</label>
+                    <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
+                      placeholder="Judul materi"
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 10,
+                        border: '1px solid var(--border)', fontSize: 13, outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Deskripsi</label>
+                    <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
+                      placeholder="Deskripsi materi..."
+                      rows={2}
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 10,
+                        border: '1px solid var(--border)', fontSize: 13, outline: 'none',
+                        boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
+                    <input type="number" min={1} max={30} value={uploadDays}
+                      onChange={e => setUploadDays(Number(e.target.value))}
+                      style={{
+                        width: 100, padding: '8px 12px', borderRadius: 10,
+                        border: '1px solid var(--border)', fontSize: 13, outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>
+                      Upload File Teks
+                      <span style={{ fontWeight: 400, color: '#73837A' }}> (.txt)</span>
+                    </label>
+                    <div style={{
+                      border: '2px dashed var(--border)', borderRadius: 12, padding: 12,
+                      background: '#fff', textAlign: 'center', cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                      onDragOver={e => { e.preventDefault(); (e.currentTarget as HTMLElement).style.borderColor = '#2FB36B'; }}
+                      onDragLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ''; }}
+                      onDrop={e => {
+                        e.preventDefault();
+                        (e.currentTarget as HTMLElement).style.borderColor = '';
+                        const file = e.dataTransfer.files[0];
+                        if (file) handleFileSelect(file);
+                      }}
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.txt';
+                        input.onchange = (e: any) => {
+                          const file = e.target?.files?.[0];
+                          if (file) handleFileSelect(file);
+                        };
+                        input.click();
+                      }}>
+                      {uploadFileName ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#152019' }}>{uploadFileName}</span>
+                          <button onClick={e => { e.stopPropagation(); setUploadFileName(""); }}
+                            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#DC2626', fontSize: 16, padding: 0 }}>
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#73837A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                          </svg>
+                          <span style={{ fontSize: 12.5, color: '#73837A' }}>Klik atau drag file .txt di sini</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>
+                      atau Copy-Paste Konten Materi
+                    </label>
+                    <textarea value={uploadRaw} onChange={e => setUploadRaw(e.target.value)}
+                      placeholder="Tempel konten materi Anda di sini..."
+                      rows={8}
+                      style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 10,
+                        border: '1px solid var(--border)', fontSize: 13, outline: 'none',
+                        boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit',
+                        lineHeight: 1.6,
+                      }}
+                    />
+                  </div>
+                  <button onClick={analyzeUploadedContent} disabled={uploadGenerating || (!uploadRaw.trim() && !uploadFileName)}
+                    className="btn btn-primary" style={{
+                      padding: '10px', fontSize: 13.5, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4,
+                    }}>
+                    {uploadGenerating ? (
+                      <>
+                        <span style={{
+                          width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)',
+                          borderTopColor: '#fff', borderRadius: '50%',
+                          animation: 'spin 0.6s linear infinite',
+                          display: 'inline-block',
+                        }} />
+                        AI Sedang Menganalisis & Membuat Soal...
+                      </>
+                    ) : "Analisis & Generate Pre/Post Test"}
+                  </button>
+                  <button onClick={() => setMode("choose")}
+                    style={{
+                      padding: '8px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
+                      border: 'none', background: 'none', cursor: 'pointer', color: '#73837A',
+                    }}>
+                    ← Kembali
+                  </button>
+                </div>
+              )}
+
+              {/* ── Upload Preview (AI-generated tests) ── */}
+              {modalMode === "upload-preview" && uploadResult && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: 18 }}>
+                    <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{uploadTitle}</h3>
+                    {uploadDesc && <p style={{ fontSize: 13, color: '#3C4A42', lineHeight: 1.5 }}>{uploadDesc}</p>}
+                  </div>
+
+                  {/* Pre-Test */}
+                  {uploadResult.pre_test?.length > 0 && (
+                    <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden' }}>
+                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#E7EEFB', fontWeight: 700, fontSize: 14, color: '#3C68B5' }}>
+                        PRE-TEST ({uploadResult.pre_test.length} soal)
+                      </div>
+                      <div style={{ padding: 12 }}>
+                        {uploadResult.pre_test.map((q: any, i: number) => (
+                          <div key={i} style={{
+                            padding: '10px 12px', borderRadius: 10,
+                            borderBottom: i < uploadResult.pre_test.length - 1 ? '1px solid var(--border-2)' : 'none',
+                            marginBottom: i < uploadResult.pre_test.length - 1 ? 6 : 0,
+                          }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                              {i + 1}. {q.question}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                              {(q.options || []).map((opt: string, oi: number) => (
+                                <div key={oi} style={{
+                                  fontSize: 12, color: '#3C4A42', padding: '3px 8px',
+                                  borderRadius: 6, background: oi === q.correct ? '#DFF5E8' : '#FAFAF8',
+                                }}>
+                                  {opt} {oi === q.correct && <span style={{ color: '#1F9D5A', fontWeight: 700 }}>✓</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Post-Test */}
+                  {uploadResult.post_test?.length > 0 && (
+                    <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden' }}>
+                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#FBEFD6', fontWeight: 700, fontSize: 14, color: '#B57A1E' }}>
+                        POST-TEST ({uploadResult.post_test.length} soal)
+                      </div>
+                      <div style={{ padding: 12 }}>
+                        {uploadResult.post_test.map((q: any, i: number) => (
+                          <div key={i} style={{
+                            padding: '10px 12px', borderRadius: 10,
+                            borderBottom: i < uploadResult.post_test.length - 1 ? '1px solid var(--border-2)' : 'none',
+                            marginBottom: i < uploadResult.post_test.length - 1 ? 6 : 0,
+                          }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                              {i + 1}. {q.question}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                              {(q.options || []).map((opt: string, oi: number) => (
+                                <div key={oi} style={{
+                                  fontSize: 12, color: '#3C4A42', padding: '3px 8px',
+                                  borderRadius: 6, background: oi === q.correct ? '#DFF5E8' : '#FAFAF8',
+                                }}>
+                                  {opt} {oi === q.correct && <span style={{ color: '#1F9D5A', fontWeight: 700 }}>✓</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                    <button onClick={() => { setModalMode("ai"); setMode("upload"); setUploadResult(null); }} style={{
+                      padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                      border: '1px solid var(--border)', background: '#fff', cursor: 'pointer',
+                    }}>
+                      Regenerate
+                    </button>
+                    <button onClick={saveUploadedMaterial} disabled={saving}
+                      className="btn btn-primary" style={{
+                        padding: '10px 24px', fontSize: 13, fontWeight: 700,
+                        display: 'flex', alignItems: 'center', gap: 6,
+                      }}>
+                      {saving ? "Menyimpan..." : "Simpan Materi"}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -558,5 +879,6 @@ export default function MaterialsPage() {
     setAiResult(null);
     setAiTopic("");
     setEditId(null);
+    resetUploadState();
   }
 }
