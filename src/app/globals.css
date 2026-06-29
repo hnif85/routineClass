@@ -1,0 +1,221 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ───── Pupuk Kaltim UMKM Connect Design System ───── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sora);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+}
+
+:root {
+  /* Pupuk Kaltim Brand */
+  --brand: #0F3D2B;
+  --brand-2: #13513A;
+  --brand-3: #0B2E20;
+  --leaf: #2FB36B;
+  --leaf-strong: #1F9D5A;
+  --leaf-soft: #DFF5E8;
+  --amber: #E2A33A;
+  --amber-soft: #FBEFD6;
+
+  /* Surface & Canvas */
+  --background: #F5F6F2;
+  --foreground: #152019;
+  --card: #FFFFFF;
+  --card-foreground: #152019;
+  --surface-soft: #F8F9F5;
+  --surface-dark: #0B2E20;
+
+  /* Text */
+  --ink: #152019;
+  --ink-2: #3C4A42;
+  --muted: #73837A;
+  --muted-foreground: #73837A;
+
+  /* Primary */
+  --primary: #0F3D2B;
+  --primary-foreground: #FFFFFF;
+  --primary-active: #13513A;
+  --primary-disabled: #E7EAE2;
+
+  /* Secondary */
+  --secondary: #F5F6F2;
+  --secondary-foreground: #152019;
+
+  /* Accent */
+  --accent: #DFF5E8;
+  --accent-foreground: #152019;
+
+  /* Semantic */
+  --destructive: #EF4444;
+  --success: #2FB36B;
+  --warning: #E2A33A;
+
+  /* Borders */
+  --border: #E7EAE2;
+  --border-2: #EFF1EB;
+  --input: #E7EAE2;
+  --ring: rgba(47,179,107,0.35);
+
+  /* Sidebar */
+  --sidebar: #0F3D2B;
+  --sidebar-foreground: #C9DDD2;
+  --sidebar-primary: #2FB36B;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(255,255,255,0.10);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255,255,255,0.08);
+
+  /* Misc */
+  --shadow: 0 1px 2px rgba(16,42,30,0.04), 0 8px 24px -12px rgba(16,42,30,0.12);
+  --shadow-lg: 0 1px 2px rgba(16,42,30,0.05), 0 20px 48px -20px rgba(16,42,30,0.22);
+  --radius: 0.625rem;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+  }
+  html { @apply font-sans; }
+
+  ::selection {
+    background: rgba(47,179,107,0.18);
+    color: #152019;
+  }
+}
+
+/* ───── Num style (Sora + tabular) ───── */
+.num {
+  font-family: var(--font-sora), "Sora", sans-serif;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+/* ───── Utility ───── */
+@utility card-hover {
+  @apply transition-all duration-200;
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 11px 16px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+  transition: all 0.18s;
+  box-shadow: var(--shadow);
+  &:hover {
+    transform: translateY(-1px);
+    border-color: #D6DBD0;
+  }
+}
+@utility btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  &:hover {
+    background: var(--brand-2);
+    box-shadow: 0 10px 22px -10px rgba(15,61,43,0.6);
+  }
+}
+@utility btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  &:hover {
+    background: rgba(0,0,0,0.04);
+  }
+}
+
+/* ───── Animations ───── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility animate-fade-in-up { animation: fade-in-up 0.5s ease-out both; }
+@utility stagger-1 { animation-delay: 0.05s; }
+@utility stagger-2 { animation-delay: 0.1s; }
+@utility stagger-3 { animation-delay: 0.15s; }
+@utility stagger-4 { animation-delay: 0.2s; }
+@utility stagger-5 { animation-delay: 0.25s; }
+@utility stagger-6 { animation-delay: 0.3s; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes ping {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ───── Progress bar fills ───── */
+.fill-green {
+  background: linear-gradient(90deg, #3BC177, #1F9D5A);
+}
+.fill-amber {
+  background: linear-gradient(90deg, #EBB857, #D9912B);
+}
+.fill-blue {
+  background: linear-gradient(90deg, #5C8BD6, #3C68B5);
+}
+
+/* ───── Sidebar link hover (client-component-safe) ───── */
+.sidebar-link-hover:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #fff !important;
+}
+
+/* ───── Responsive: Mobile bottom bar / Desktop sidebar ───── */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-bottombar { display: flex !important; }
+  .app-layout { grid-template-columns: 1fr !important; }
+  /* Hide topbar on mobile, bottom nav replaces it */
+  header { display: none !important; }
+}
+@media (min-width: 769px) {
+  .mobile-bottombar { display: none !important; }
+}
