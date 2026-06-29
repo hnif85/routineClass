@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./header";
 
@@ -33,6 +34,15 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
 export function AppLayout({ config, children }: { config: any; children: React.ReactNode }) {
   const { collapsed, sidebarWidth } = useSidebar();
+  const pathname = usePathname();
+
+  // Pages without sidebar: login, participant test portal, UMKM portal
+  const noSidebarPaths = ["/login", "/take/", "/portal"];
+  const hideSidebar = noSidebarPaths.some((p) => pathname.startsWith(p));
+
+  if (hideSidebar) {
+    return <>{children}</>;
+  }
 
   return (
     <div

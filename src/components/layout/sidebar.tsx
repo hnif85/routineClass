@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import type { AppConfig } from "@/lib/config/app-config";
 import { useSidebar } from "./sidebar-context";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface SidebarProps { config: AppConfig; }
 
@@ -39,12 +40,20 @@ export function Sidebar({ config }: SidebarProps) {
   const [showMore, setShowMore] = useState(false);
   const [evCount, setEvCount] = useState(0);
   const [umkmCount, setUmkmCount] = useState(0);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const s = createClient();
     s.from("events").select("*", { count: "exact", head: true }).then(({ count }) => setEvCount(count || 0));
     s.from("umkm").select("*", { count: "exact", head: true }).eq("is_active", true).then(({ count }) => setUmkmCount(count || 0));
+    fetch("/api/auth/me").then(r => r.json()).then(d => { if (d.user) setUserName(d.user.name); }).catch(() => {});
   }, []);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    toast.success("Berhasil logout");
+    window.location.href = "/login";
+  }
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === href;
@@ -165,9 +174,25 @@ export function Sidebar({ config }: SidebarProps) {
                   {config.brand_short_name?.charAt(0) || 'P'}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#EAF4EF', lineHeight: 1.15 }}>{config.brand_name}</div>
-                  <div style={{ fontSize: 10.5, color: '#86AD98', marginTop: 1 }}>Admin · v{config.version}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#EAF4EF', lineHeight: 1.15 }}>{userName || config.brand_name}</div>
+                  <div style={{ fontSize: 10.5, color: '#86AD98', marginTop: 1 }}>
+                    {userName ? `Admin · v${config.version}` : config.brand_short_name}
+                  </div>
                 </div>
+                {userName && (
+                  <button onClick={logout} title="Logout"
+                    style={{
+                      border: 'none', background: 'rgba(255,255,255,0.08)', color: '#86AD98',
+                      width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flex: '0 0 auto',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}>
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           </>
@@ -248,6 +273,20 @@ export function Sidebar({ config }: SidebarProps) {
                   </Link>
                 );
               })}
+              <button onClick={() => { setShowMore(false); logout(); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 14px', borderRadius: 12,
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  fontSize: 14, fontWeight: 600, color: '#DC2626', width: '100%', textAlign: 'left',
+                }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Logout
+              </button>
             </div>
             <button onClick={() => setShowMore(false)}
               style={{
