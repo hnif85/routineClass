@@ -1,6 +1,7 @@
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getAppConfig } from "@/lib/config/app-config";
 import Link from "next/link";
+import AddUmkmButton from "./add-button";
 
 export default async function UmkmListPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
   const config = await getAppConfig();
@@ -45,12 +46,7 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
           <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>{(count || 0).toLocaleString("id-ID")} UMKM terdaftar</p>
         </div>
         <div style={{ marginLeft: 'auto', marginTop: 4 }}>
-          <Link href="/umkm/import" className="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
-              <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-            </svg>
-            Import CSV
-          </Link>
+          <AddUmkmButton />
         </div>
       </div>
 
