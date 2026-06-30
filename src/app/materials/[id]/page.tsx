@@ -258,7 +258,7 @@ export default function MaterialDetailPage() {
             </div>
           ) : (
             contentDays.map((c: any, i: number) => (
-              <div key={c.day}
+              <div key={`day-${i}`}
                 onClick={() => scrollToDay(c.day)}
                 style={{
                   padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
