@@ -211,7 +211,8 @@ export default function MaterialsPage() {
   );
 
   return (
-    <div style={{ animation: 'fade-in-up 0.5s ease-out both' }}>
+    <>
+      <div style={{ animation: 'fade-in-up 0.5s ease-out both' }}>
       {/* Page Head */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
         <div>
@@ -329,6 +330,8 @@ export default function MaterialsPage() {
             </div>
           </div>
         ))}
+      </div>
+
       </div>
 
       {/* ═══ MODAL: Create / Detail ═══ */}
@@ -869,7 +872,7 @@ export default function MaterialsPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 
   function closeModal() {
