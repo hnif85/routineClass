@@ -16,7 +16,7 @@ export default function MaterialDetailPage() {
   const [allMats, setAllMats] = useState<any[]>([]);
   const [mat, setMat] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   // ── Event Usage & Test Stats ──
   const [eventStats, setEventStats] = useState<any[]>([]);
@@ -51,8 +51,8 @@ export default function MaterialDetailPage() {
         setEditSyllabus(found.syllabus || []);
         // Auto-select first day
         const days = found.content || [];
-        if (days.length > 0 && selectedDay === null) {
-          setSelectedDay(days[0].day);
+        if (days.length > 0 && selectedIdx === null) {
+          setSelectedIdx(0);
         }
       }
     }
@@ -199,8 +199,8 @@ export default function MaterialDetailPage() {
   // Content days for sidebar nav
   const contentDays = mat ? (mat.content || []) : [];
 
-  function scrollToDay(day: number) {
-    setSelectedDay(day);
+  function selectSession(idx: number) {
+    setSelectedIdx(idx);
   }
 
   return (
@@ -259,12 +259,12 @@ export default function MaterialDetailPage() {
           ) : (
             contentDays.map((c: any, i: number) => (
               <div key={`day-${i}`}
-                onClick={() => scrollToDay(c.day)}
+                onClick={() => selectSession(i)}
                 style={{
                   padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
                   marginBottom: 3, transition: 'all 0.12s',
-                  background: selectedDay === c.day ? '#DFF5E8' : 'transparent',
-                  border: selectedDay === c.day ? '1px solid #A8DFC1' : '1px solid transparent',
+                  background: selectedIdx === i ? '#DFF5E8' : 'transparent',
+                  border: selectedIdx === i ? '1px solid #A8DFC1' : '1px solid transparent',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -274,10 +274,10 @@ export default function MaterialDetailPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 10, fontWeight: 700, flex: '0 0 auto',
                   }}>
-                    {c.day}
+                    {i + 1}
                   </span>
                   <span style={{ fontSize: 12.5, fontWeight: 600, color: '#152019', lineHeight: 1.3 }}>
-                    {c.title || `Hari ${c.day}`}
+                    {c.title || `Sesi ${i + 1}`}
                   </span>
                 </div>
               </div>
@@ -483,7 +483,7 @@ export default function MaterialDetailPage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>
-                  {editing ? "Konten Materi" : selectedDay ? `Hari ${selectedDay}: ${contentDays.find((c: any) => c.day === selectedDay)?.title || ""}` : "Konten Materi"}
+                  {editing ? "Konten Materi" : selectedIdx !== null && contentDays[selectedIdx] ? `Sesi ${selectedIdx + 1}: ${contentDays[selectedIdx]?.title || ""}` : "Konten Materi"}
                 </h3>
                 {editing && (
                   <button onClick={addContentDay} style={{
@@ -526,10 +526,10 @@ export default function MaterialDetailPage() {
                     </div>
                   </details>
                 ))
-              ) : selectedDay ? (
+              ) : selectedIdx !== null ? (
                 // ── View mode: show only selected day ──
                 (() => {
-                  const day = contentDays.find((c: any) => c.day === selectedDay);
+                  const day = contentDays[selectedIdx];
                   if (!day) return <p style={{ color: '#73837A', fontSize: 13 }}>Pilih sesi dari sidebar.</p>;
                   return (
                     <div style={{
