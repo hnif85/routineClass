@@ -369,120 +369,85 @@ export default function PortalPage() {
                 const isPaid = ev.paymentStatus === "pending";
                 const isConfirmed =
                   ev.invStatus === "confirmed" || ev.paymentStatus === "paid";
-                const canOpenMaterial = isConfirmed && ev.status !== "draft";
 
                 return (
                   <div
                     key={ev.id}
+                    onClick={() => {
+                      if (isPaid && ev.invitationId) {
+                        payEvent(ev.invitationId!);
+                      } else {
+                        push(`/portal/events/${ev.id}`);
+                      }
+                    }}
                     style={{
                       background: "#fff",
                       borderRadius: 16,
                       padding: "16px 18px",
                       boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
                       border: "1px solid #F1F5F9",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
+                      cursor: "pointer",
+                      transition: "box-shadow 0.15s, transform 0.15s",
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
+                      e.currentTarget.style.transform = "translateY(0)";
                     }}
                   >
-                    {/* Status badge */}
-                    <div
-                      style={{
-                        flex: "0 0 auto",
-                        textAlign: "center",
-                        padding: "8px 12px",
-                        borderRadius: 10,
-                        background: isConfirmed ? "#F0FDF4" : isPaid ? "#FEF3C7" : "#F0F9FF",
-                        minWidth: 80,
-                      }}
-                    >
-                      <div style={{ fontSize: 9, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        Status
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          marginTop: 2,
-                          color: isConfirmed ? "#16A34A" : isPaid ? "#D97706" : "#2563EB",
-                        }}
-                      >
-                        {isPaid ? "Belum Bayar" : isConfirmed ? "Terkonfirmasi" : "Terdaftar"}
-                      </div>
-                    </div>
-
-                    {/* Event info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 4 }}>
-                        {ev.title}
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 12px", fontSize: 12, color: "#64748B" }}>
-                        <span>📅 {formatDate(ev.start_date)}</span>
-                        {ev.start_time && (
-                          <span>🕐 {formatTime(ev.start_time)}{ev.end_time ? ` – ${formatTime(ev.end_time)}` : ""} WIB</span>
+                    {/* Top row: title (wide) + status badge (right) */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                      {/* Left: title + info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: "#1E293B", marginBottom: 6, lineHeight: 1.3 }}>
+                          {ev.title}
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 12px", fontSize: 12, color: "#64748B" }}>
+                          <span>📅 {formatDate(ev.start_date)}</span>
+                          {ev.start_time && (
+                            <span>🕐 {formatTime(ev.start_time)}{ev.end_time ? ` – ${formatTime(ev.end_time)}` : ""} WIB</span>
+                          )}
+                        </div>
+                        {ev.location && (
+                          <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>
+                            📍 {ev.location}
+                          </div>
                         )}
                       </div>
-                      {ev.location && (
-                        <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>
-                          📍 {ev.location}
+
+                      {/* Right: status badge */}
+                      <div
+                        style={{
+                          flex: "0 0 auto",
+                          textAlign: "center",
+                          padding: "6px 12px",
+                          borderRadius: 10,
+                          background: isConfirmed ? "#F0FDF4" : isPaid ? "#FEF3C7" : "#F0F9FF",
+                          minWidth: 80,
+                        }}
+                      >
+                        <div style={{ fontSize: 9, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          Status
                         </div>
-                      )}
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            marginTop: 2,
+                            color: isConfirmed ? "#16A34A" : isPaid ? "#D97706" : "#2563EB",
+                          }}
+                        >
+                          {isPaid ? "Belum Bayar" : isConfirmed ? "Terkonfirmasi" : "Terdaftar"}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Action */}
-                    <div style={{ flex: "0 0 auto" }}>
-                      {isPaid && ev.invitationId ? (
-                        <button
-                          onClick={() => payEvent(ev.invitationId!)}
-                          style={{
-                            border: "none",
-                            background: "#F59E0B",
-                            color: "#fff",
-                            padding: "8px 16px",
-                            borderRadius: 10,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          💰 Bayar
-                        </button>
-                      ) : canOpenMaterial ? (
-                        <button
-                          onClick={() => push(`/portal/events/${ev.id}`)}
-                          style={{
-                            border: "none",
-                            background: "#2563EB",
-                            color: "#fff",
-                            padding: "8px 16px",
-                            borderRadius: 10,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          Buka Materi
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => push(`/portal/events/${ev.id}`)}
-                          style={{
-                            border: "1px solid #E2E8F0",
-                            background: "#fff",
-                            color: "#475569",
-                            padding: "8px 16px",
-                            borderRadius: 10,
-                            fontSize: 12,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          Lihat Detail
-                        </button>
-                      )}
+                    {/* Action hint */}
+                    <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: isPaid ? "#D97706" : "#2563EB" }}>
+                      {isPaid ? "💰 Klik untuk bayar →" : "Klik untuk lihat detail →"}
                     </div>
                   </div>
                 );
@@ -522,12 +487,23 @@ export default function PortalPage() {
                 return (
                   <div
                     key={ev.id}
+                    onClick={() => registerForEvent(ev.id)}
                     style={{
                       background: "#fff",
                       borderRadius: 16,
                       padding: "16px 18px",
                       boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
                       border: "1px solid #F1F5F9",
+                      cursor: "pointer",
+                      transition: "box-shadow 0.15s, transform 0.15s",
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
+                      e.currentTarget.style.transform = "translateY(0)";
                     }}
                   >
                     {/* Top row: badge + date */}
@@ -547,7 +523,7 @@ export default function PortalPage() {
                     </div>
 
                     {/* Title */}
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#1E293B", marginBottom: 6, lineHeight: 1.3 }}>
                       {ev.title}
                     </div>
 
@@ -559,7 +535,7 @@ export default function PortalPage() {
 
                     {/* Quota progress */}
                     {ev.quota && (
-                      <div style={{ marginBottom: 12 }}>
+                      <div style={{ marginBottom: 10 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748B", marginBottom: 4 }}>
                           <span>Sisa Kuota</span>
                           <span style={{ fontWeight: 700, color: barColor }}>
@@ -580,31 +556,10 @@ export default function PortalPage() {
                       </div>
                     )}
 
-                    {/* Register button */}
-                    <button
-                      onClick={() => registerForEvent(ev.id)}
-                      disabled={registering === ev.id}
-                      style={{
-                        width: "100%",
-                        border: "1.5px solid #2563EB",
-                        background: "#fff",
-                        color: "#2563EB",
-                        padding: "10px 0",
-                        borderRadius: 10,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        cursor: registering === ev.id ? "wait" : "pointer",
-                        transition: "all 0.15s",
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.background = "#EFF6FF";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.background = "#fff";
-                      }}
-                    >
-                      {registering === ev.id ? "Mendaftar..." : "Daftar Sekarang"}
-                    </button>
+                    {/* Action hint */}
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#2563EB" }}>
+                      {registering === ev.id ? "Mendaftar..." : "Klik untuk daftar →"}
+                    </div>
                   </div>
                 );
               })}
