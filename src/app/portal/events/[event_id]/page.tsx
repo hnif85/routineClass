@@ -75,6 +75,7 @@ export default function PortalEventDetailPage() {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [eventApps, setEventApps] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -100,6 +101,11 @@ export default function PortalEventDetailPage() {
       return;
     }
     setEvent(ev);
+
+    // Load event apps
+    supabase.from("event_apps").select("app:master_apps(*)").eq("event_id", eventId).then(({ data }) => {
+      setEventApps((data || []).map((ea: any) => ea.app).filter(Boolean));
+    });
 
     // Load UMKM's invitation for this event
     const { data: inv } = await supabase
@@ -300,6 +306,27 @@ export default function PortalEventDetailPage() {
                 <div style={{ color: "#64748B", fontSize: 10.5, fontWeight: 600, marginBottom: 2 }}>PEMBICARA</div>
                 <div style={{ color: "#1E293B", fontWeight: 600 }}>{event.speaker_name}</div>
                 {event.speaker_bio && <div style={{ color: "#475569", fontSize: 12, marginTop: 2 }}>{event.speaker_bio}</div>}
+              </div>
+            )}
+            {/* Apps */}
+            {eventApps.length > 0 && (
+              <div style={{ gridColumn: "1 / -1" }}>
+                <div style={{ color: "#64748B", fontSize: 10.5, fontWeight: 600, marginBottom: 4 }}>APLIKASI YANG DIAJARKAN</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {eventApps.map((app: any) => (
+                    <span key={app.id} style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "5px 12px", borderRadius: 8,
+                      border: `1.5px solid ${app.color}44`,
+                      background: `${app.color}10`,
+                      color: app.color,
+                      fontSize: 12, fontWeight: 700,
+                    }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: app.color, display: "inline-block" }} />
+                      {app.name}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>

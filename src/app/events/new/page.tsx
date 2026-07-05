@@ -22,6 +22,10 @@ export default function NewEventPage() {
   const [externalNames, setExternalNames] = useState<string[]>([]);
   const [newExternal, setNewExternal] = useState("");
 
+  // Multi-select apps
+  const [masterApps, setMasterApps] = useState<any[]>([]);
+  const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
+
   const [f, setF] = useState({
     title: "", description: "", type: "offline", start_date: "", end_date: "",
     start_time: "", end_time: "", location: "", quota: "", speaker_name: "",
@@ -42,6 +46,10 @@ export default function NewEventPage() {
     s.from("admin_users").select("*").in("role", ["trainer", "admin", "event_admin"]).order("name").then(({ data }) => {
       setTrainers(data || []);
     });
+    // Fetch master apps
+    s.from("master_apps").select("*").order("sort_order").then(({ data }) => {
+      setMasterApps(data || []);
+    });
   }, []);
 
   const ic = "w-full bg-white border border-[var(--border)] rounded-[12px] px-3 py-2.5 text-[14px] text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[rgba(47,179,107,0.35)]";
@@ -52,94 +60,6 @@ export default function NewEventPage() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  }
-
-  async function autoComposeTest(eventId: string, selectedMats: any[]) {
-    // Collect all pre_test and post_test questions from materials that have test_data
-    const allPre: any[] = [];
-    const allPost: any[] = [];
-    let sourceNames: string[] = [];
-
-    for (const mat of selectedMats) {
-      if (!mat.test_data) continue;
-      const td = mat.test_data;
-      if (td.pre_test?.length > 0) {
-        allPre.push(...td.pre_test.map((q: any) => ({ ...q, source: mat.title })));
-      }
-      if (td.post_test?.length > 0) {
-        allPost.push(...td.post_test.map((q: any) => ({ ...q, source: mat.title })));
-      }
-      if (td.pre_test?.length > 0 || td.post_test?.length > 0) {
-        sourceNames.push(mat.title);
-      }
-    }
-
-    if (allPre.length === 0 && allPost.length === 0) return; // no test data
-
-    // Create test record
-    const testName = `Test: ${sourceNames.length <= 2 ? sourceNames.join(" + ") : sourceNames.length + " materi"}`;
-    const { data: test, error: testErr } = await s.from("tests").insert({
-      name: testName,
-      description: `Auto-composed pre/post test dari materi untuk event`,
-      type: "test",
-    }).select().single();
-
-    if (testErr || !test) {
-      toast.error("Gagal membuat test: " + (testErr?.message || "unknown"));
-      return;
-    }
-
-    const eventTestsToInsert: { event_id: string; phase_id: string; open_time: string }[] = [];
-
-    // Pre phase
-    if (allPre.length > 0) {
-      const { data: prePhase } = await s.from("test_phases").insert({
-        test_id: test.id, phase: "pre", label: "Pre-Test", sort_order: 0,
-      }).select().single();
-
-      if (prePhase) {
-        await s.from("test_questions").insert(
-          allPre.map((q: any, i: number) => ({
-            phase_id: prePhase.id,
-            question_text: q.question || q.question_text,
-            question_type: q.question_type || (q.options ? "multiple_choice" : "essay"),
-            options: q.options || null,
-            correct_answer: q.correct_answer ?? q.correct ?? null,
-            points: q.points || 1,
-            sort_order: i,
-          }))
-        );
-        eventTestsToInsert.push({ event_id: eventId, phase_id: prePhase.id, open_time: "before" });
-      }
-    }
-
-    // Post phase — open_time = "during" (auto-buka saat event berlangsung)
-    if (allPost.length > 0) {
-      const { data: postPhase } = await s.from("test_phases").insert({
-        test_id: test.id, phase: "post", label: "Post-Test", sort_order: 1,
-      }).select().single();
-
-      if (postPhase) {
-        await s.from("test_questions").insert(
-          allPost.map((q: any, i: number) => ({
-            phase_id: postPhase.id,
-            question_text: q.question || q.question_text,
-            question_type: q.question_type || (q.options ? "multiple_choice" : "essay"),
-            options: q.options || null,
-            correct_answer: q.correct_answer ?? q.correct ?? null,
-            points: q.points || 1,
-            sort_order: i,
-          }))
-        );
-        eventTestsToInsert.push({ event_id: eventId, phase_id: postPhase.id, open_time: "during" });
-      }
-    }
-
-    // Bind to event
-    if (eventTestsToInsert.length > 0) {
-      const { error: be } = await s.from("event_tests").insert(eventTestsToInsert);
-      if (be) toast.error("Binding test gagal: " + be.message);
-    }
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -153,68 +73,46 @@ export default function NewEventPage() {
       return;
     }
 
-    // 1. Create event — merge all trainer names
     const internalNames = trainers.filter(t => selectedTrainerIds.has(t.id)).map(t => t.name);
-    const allSpeakerNames = [...internalNames, ...externalNames].join(", ");
-    const speakerIdsArr = Array.from(selectedTrainerIds);
 
-    const { data: event, error } = await s.from("events")
-      .insert({
-        ...f,
-        status: "draft",
-        price: f.is_paid ? (parseInt(f.price) || 50000) : 0,
-        quota: f.quota ? parseInt(f.quota) : null,
-        end_date: f.end_date || null,
-        start_time: f.start_time || null,
-        end_time: f.end_time || null,
-        speaker_name: allSpeakerNames || null,
-        speaker_ids: speakerIdsArr,
-      })
-      .select().single();
-    if (error) { toast.error("Gagal: " + error.message); setLoading(false); return; }
+    try {
+      const res = await fetch("/api/events/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: f.title,
+          description: f.description,
+          type: f.type,
+          start_date: f.start_date,
+          end_date: f.end_date || null,
+          start_time: f.start_time || null,
+          end_time: f.end_time || null,
+          location: f.location,
+          quota: f.quota || null,
+          registration_type: f.registration_type,
+          is_paid: f.is_paid,
+          price: f.price,
+          trainerIds: Array.from(selectedTrainerIds),
+          externalNames,
+          materialIds: Array.from(selectedMaterialIds),
+          kuesionerId: selectedKuesionerId,
+          appIds: Array.from(selectedAppIds),
+        }),
+      });
 
-    // 1b. Save event_trainers
-    const trainerInserts = [
-      ...internalNames.map((name, i) => {
-        const t = trainers.find(tr => tr.id === speakerIdsArr[i]);
-        return { event_id: event.id, trainer_id: speakerIdsArr[i], trainer_name: name, trainer_email: t?.email || null, is_external: false };
-      }),
-      ...externalNames.map(name => ({ event_id: event.id, trainer_name: name, is_external: true })),
-    ];
-    if (trainerInserts.length > 0) {
-      await s.from("event_trainers").insert(trainerInserts);
-    }
-
-    // 2. Insert event_materials
-    const selectedMats = materials.filter(m => selectedMaterialIds.has(m.id));
-    if (selectedMats.length > 0) {
-      const { error: me } = await s.from("event_materials").insert(
-        selectedMats.map((m, i) => ({ event_id: event.id, material_id: m.id, sort_order: i }))
-      );
-      if (me) toast.error("Link materi gagal: " + me.message);
-    }
-
-    // 3. Auto-compose test from material test_data
-    await autoComposeTest(event.id, selectedMats);
-
-    // 4. Bind kuesioner if selected
-    if (selectedKuesionerId) {
-      // Find the kuesioner's phases
-      const kues = tests.find(t => t.id === selectedKuesionerId);
-      if (kues && kues.phases.length > 0) {
-        const { error: ke } = await s.from("event_tests").insert(
-          kues.phases.map((p: any) => ({
-            event_id: event.id,
-            phase_id: p.id,
-            open_time: "during",
-          }))
-        );
-        if (ke) toast.error("Binding kuesioner gagal: " + ke.message);
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error);
+        setLoading(false);
+        return;
       }
-    }
 
-    toast.success("Event berhasil dibuat!");
-    router.push("/events");
+      toast.success("Event berhasil dibuat!");
+      router.push("/events");
+    } catch (e: any) {
+      toast.error("Gagal: " + e.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -355,6 +253,61 @@ export default function NewEventPage() {
             <div style={{ marginTop: 6, fontSize: 12, color: '#64748B' }}>
               {selectedTrainerIds.size + externalNames.length} narasumber dipilih
             </div>
+          )}
+        </div>
+
+        {/* ─── APLIKASI YANG DIAJARKAN ─── */}
+        <div style={{ paddingTop: 4, borderTop: '1px solid var(--border-2)' }}>
+          <Label style={{ marginBottom: 12 }}>Aplikasi yang Diajarkan</Label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {masterApps.map((app) => {
+              const isSelected = selectedAppIds.has(app.id);
+              return (
+                <div
+                  key={app.id}
+                  onClick={() => {
+                    const next = new Set(selectedAppIds);
+                    if (next.has(app.id)) next.delete(app.id); else next.add(app.id);
+                    setSelectedAppIds(next);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '8px 14px', borderRadius: 10,
+                    border: `2px solid ${isSelected ? app.color : 'var(--border-2)'}`,
+                    background: isSelected ? `${app.color}12` : '#FAFAF8',
+                    cursor: 'pointer', transition: 'all 0.15s',
+                    userSelect: 'none',
+                  }}
+                >
+                  <div style={{
+                    width: 12, height: 12, borderRadius: '50%',
+                    background: app.color, flex: '0 0 auto',
+                    boxShadow: isSelected ? `0 0 0 3px ${app.color}44` : 'none',
+                  }} />
+                  <span style={{
+                    fontSize: 13, fontWeight: isSelected ? 700 : 600,
+                    color: isSelected ? app.color : '#475569',
+                  }}>
+                    {app.name}
+                  </span>
+                  {isSelected && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke={app.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {selectedAppIds.size === 0 && (
+            <p style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>
+              Pilih aplikasi MWX yang akan diajarkan di event ini
+            </p>
+          )}
+          {selectedAppIds.size > 0 && (
+            <p style={{ fontSize: 12, fontWeight: 600, color: '#2563EB', marginTop: 8 }}>
+              {selectedAppIds.size} aplikasi dipilih
+            </p>
           )}
         </div>
 

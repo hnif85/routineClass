@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 const PUBLIC_ROUTES = ["/login", "/take", "/daftar", "/_next", "/favicon.ico", "/api/auth", "/api/umkm", "/api/daftar", "/api/wilayah"];
 const UMKM_ROUTES = ["/portal"];
 const ADMIN_ROUTES = ["/dashboard", "/events", "/umkm", "/tests", "/materials", "/wa-inbox", "/admin"];
-const PEMATERI_ROUTES = ["/dashboard", "/events", "/materials"];
+const PEMATERI_ROUTES = ["/dashboard", "/events", "/materials", "/api/events/create"];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

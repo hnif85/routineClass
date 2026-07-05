@@ -91,6 +91,9 @@ export default function EventDetailPage() {
   const [aiResult, setAiResult] = useState<any>(null);
   const [savingMateri, setSavingMateri] = useState(false);
 
+  // Event apps
+  const [eventApps, setEventApps] = useState<any[]>([]);
+
   // ── Modal add peserta ──
   const [showModal, setShowModal] = useState(false);
   const [sr, setSr] = useState<any[]>([]);
@@ -113,6 +116,10 @@ export default function EventDetailPage() {
     loadEventMaterials();
     loadCertificates();
     s.from("umkm").select("city").eq("is_active", true).then(({ data }) => setCities([...new Set((data || []).map((d: any) => d.city))]));
+    // Load event apps
+    s.from("event_apps").select("app:master_apps(*)").eq("event_id", eventId).then(({ data }) => {
+      setEventApps((data || []).map((ea: any) => ea.app).filter(Boolean));
+    });
   }, [eventId]);
 
   async function loadCertificates() {
@@ -608,6 +615,20 @@ export default function EventDetailPage() {
         <span style={{ ...chipStyle, background: ev.registration_type === "invitation" ? '#EFF6FF' : '#FBEFD6' }}>
           {ev.registration_type === "invitation" ? "Undangan" : ev.registration_type === "open" ? "Terbuka" : "Keduanya"}
         </span>
+        {/* Apps */}
+        {eventApps.map((app: any) => (
+          <span key={app.id} style={{
+            ...chipStyle,
+            border: `1.5px solid ${app.color}44`,
+            background: `${app.color}10`,
+            color: app.color,
+            fontWeight: 700,
+            fontSize: 11,
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: app.color, display: 'inline-block', marginRight: 4 }} />
+            {app.name}
+          </span>
+        ))}
       </div>
 
       {/* ─── Tab Bar ─── */}
