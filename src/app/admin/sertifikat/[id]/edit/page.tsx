@@ -29,7 +29,7 @@ function createDefaultElement(type: string): Element {
   const base = { id, type, x: 100, y: 100, w: 200, h: 40 };
   switch (type) {
     case "text": return { ...base, w: 400, h: 50, props: { content: "Teks Baru", fontSize: 24, fontFamily: "Sora", color: "#1E3A5F", bold: false, align: "center" } };
-    case "image": return { ...base, w: 100, h: 100, props: { src: "/assets/default-logo.png" } };
+    case "image": return { ...base, w: 100, h: 100, props: { src: "https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" } };
     case "line":  return { ...base, w: 300, h: 2, props: { color: "#E2A33A", thickness: 2 } };
     case "rect":  return { ...base, w: 200, h: 100, props: { bgColor: "transparent", borderColor: "#1E3A5F", borderWidth: 2, borderRadius: 8 } };
     default: return { ...base, props: {} };

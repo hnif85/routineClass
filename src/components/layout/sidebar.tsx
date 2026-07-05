@@ -104,7 +104,7 @@ export function Sidebar({ config }: SidebarProps) {
         {/* Collapsed state */}
         {collapsed ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 16, gap: 16 }}>
-            <img src="/assets/default-logo.png" alt=""
+            <img src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" alt=""
               style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'contain' }} />
             <button onClick={toggle}
               style={{
@@ -129,7 +129,7 @@ export function Sidebar({ config }: SidebarProps) {
 
             {/* Brand + Toggle */}
             <div style={{ position: 'relative', zIndex: 1, padding: '26px 22px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
-              <img src="/assets/default-logo.png" alt="MWX"
+              <img src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" alt="MWX"
                 style={{ width: 40, height: 40, borderRadius: 10, flex: '0 0 auto', objectFit: 'contain', background: 'rgba(255,255,255,0.12)', padding: 3, boxShadow: '0 4px 12px -4px rgba(0,0,0,0.3)' }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-sora)', fontSize: 15, fontWeight: 700, lineHeight: 1.1 }}>{config.app_name}</div>

@@ -132,7 +132,7 @@ export default function DaftarPage() {
         padding: "14px 24px", display: "flex", alignItems: "center", gap: 12,
       }}>
         <img
-           src="/assets/default-logo.png"
+           src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png"
           alt="MWX"
           style={{ height: 28, objectFit: "contain" }}
         />

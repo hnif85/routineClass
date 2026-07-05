@@ -295,7 +295,7 @@ export default function PortalPage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img
-            src="/assets/default-logo.png"
+            src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png"
             alt=""
             style={{ width: 24, height: 24, borderRadius: 5 }}
           />

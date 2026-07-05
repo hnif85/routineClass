@@ -64,7 +64,7 @@ export default function LoginPage() {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="/assets/default-logo.png" alt=""
+          <img src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" alt=""
             style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'contain', background: '#fff', padding: 6, marginBottom: 12 }} />
           <h1 style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: '#1E293B', margin: 0 }}>
             UMKM Connect
