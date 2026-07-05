@@ -33,18 +33,18 @@ export function Topbar({ config }: HeaderProps) {
       }}
     >
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, fontWeight: 600, color: '#3C4A42' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, fontWeight: 600, color: '#475569' }}>
         <span style={{
           width: 7,
           height: 7,
           borderRadius: '50%',
-          background: '#2FB36B',
-          boxShadow: '0 0 0 3px #DFF5E8',
+          background: '#3B82F6',
+          boxShadow: '0 0 0 3px #EFF6FF',
           flex: '0 0 auto',
         }} />
         <span>{config.brand_short_name}</span>
-        <span style={{ color: '#73837A', opacity: 0.5 }}>/</span>
-        <span style={{ color: '#152019' }}>{label || "Dashboard"}</span>
+        <span style={{ color: '#64748B', opacity: 0.5 }}>/</span>
+        <span style={{ color: '#1E293B' }}>{label || "Dashboard"}</span>
       </div>
 
       {/* Live pill */}
@@ -66,7 +66,7 @@ export function Topbar({ config }: HeaderProps) {
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: '#2FB36B',
+          background: '#3B82F6',
           position: 'relative',
         }}>
           <span style={{
@@ -74,7 +74,7 @@ export function Topbar({ config }: HeaderProps) {
             position: 'absolute',
             inset: -4,
             borderRadius: '50%',
-            background: '#2FB36B',
+            background: '#3B82F6',
             opacity: 0.35,
             animation: 'ping 1.8s ease-out infinite',
           }} />

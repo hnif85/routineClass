@@ -24,7 +24,7 @@ export default function LoginPage() {
 
   if (checking) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0F3D2B 0%, #0B2E20 100%)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1E3A5F 0%, #1E3A5F 100%)' }}>
         <div style={{ color: '#86AD98', fontSize: 14 }}>Memeriksa sesi...</div>
       </div>
     );
@@ -55,21 +55,21 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0F3D2B 0%, #0B2E20 100%)',
+      background: 'linear-gradient(135deg, #1E3A5F 0%, #1E3A5F 100%)',
       padding: 20,
     }}>
       <div style={{
-        background: '#F5F6F2', borderRadius: 24, padding: '40px 36px',
+        background: '#F4F7FC', borderRadius: 24, padding: '40px 36px',
         width: '100%', maxWidth: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="https://pupukkaltim.com/public/assets/files/img/logodasar.png" alt=""
+          <img src="/assets/default-logo.png" alt=""
             style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'contain', background: '#fff', padding: 6, marginBottom: 12 }} />
-          <h1 style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: '#152019', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: '#1E293B', margin: 0 }}>
             UMKM Connect
           </h1>
-          <p style={{ fontSize: 13, color: '#73837A', marginTop: 4 }}>Masuk ke platform monitoring UMKM</p>
+          <p style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>Masuk ke platform monitoring UMKM</p>
         </div>
 
         {error && (
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#3C4A42', marginBottom: 5, display: 'block', letterSpacing: '0.04em' }}>EMAIL</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 5, display: 'block', letterSpacing: '0.04em' }}>EMAIL</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="admin@example.com"
               style={{
@@ -93,7 +93,7 @@ export default function LoginPage() {
               }} />
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#3C4A42', marginBottom: 5, display: 'block', letterSpacing: '0.04em' }}>PASSWORD</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 5, display: 'block', letterSpacing: '0.04em' }}>PASSWORD</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
               style={{
@@ -106,7 +106,7 @@ export default function LoginPage() {
             style={{
               width: '100%', padding: '12px', borderRadius: 11, fontSize: 14, fontWeight: 700,
               border: 'none', cursor: 'pointer', marginTop: 8,
-              background: 'linear-gradient(135deg, #2FB36B, #1F9D5A)', color: '#fff',
+              background: 'linear-gradient(135deg, #3B82F6, #2563EB)', color: '#fff',
             }}>
             {loading ? "Memproses..." : "Masuk"}
           </button>

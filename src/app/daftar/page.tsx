@@ -85,7 +85,7 @@ export default function DaftarPage() {
     return (
       <div style={{
         minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-        background: "#F5F6F2", padding: 24,
+        background: "#F4F7FC", padding: 24,
       }}>
         <div style={{
           background: "#fff", borderRadius: 24, padding: "48px 40px",
@@ -94,23 +94,23 @@ export default function DaftarPage() {
         }}>
           <div style={{
             width: 64, height: 64, borderRadius: "50%",
-            background: "#DFF5E8", display: "flex", alignItems: "center",
+            background: "#EFF6FF", display: "flex", alignItems: "center",
             justifyContent: "center", margin: "0 auto 20px",
           }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <h2 style={{
             fontFamily: "var(--font-sora)", fontSize: 24, fontWeight: 800,
-            color: "#152019", marginBottom: 8,
+            color: "#1E293B", marginBottom: 8,
           }}>
             Pendaftaran Berhasil!
           </h2>
-          <p style={{ fontSize: 14, color: "#3C4A42", lineHeight: 1.6, marginBottom: 16 }}>
-            <strong style={{ color: "#152019" }}>{businessName}</strong> telah terdaftar sebagai UMKM binaan Pupuk Kaltim.
+          <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.6, marginBottom: 16 }}>
+            <strong style={{ color: "#1E293B" }}>{businessName}</strong> telah terdaftar sebagai UMKM binaan MWX.
           </p>
-          <p style={{ fontSize: 13, color: "#73837A", lineHeight: 1.5 }}>
+          <p style={{ fontSize: 13, color: "#64748B", lineHeight: 1.5 }}>
             Tim kami akan menghubungi Anda melalui WhatsApp untuk informasi selanjutnya.
           </p>
         </div>
@@ -119,11 +119,11 @@ export default function DaftarPage() {
   }
 
   const input = "w-full bg-white border border-[var(--border)] rounded-[12px] px-3 py-2.5 text-[14px] text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[rgba(47,179,107,0.35)]";
-  const label = "block text-[12px] font-bold tracking-[0.06em] uppercase text-[#3C4A42] mb-1.5";
+  const label = "block text-[12px] font-bold tracking-[0.06em] uppercase text-[#475569] mb-1.5";
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#F5F6F2",
+      minHeight: "100vh", background: "#F4F7FC",
       display: "flex", flexDirection: "column",
     }}>
       {/* Header */}
@@ -132,14 +132,14 @@ export default function DaftarPage() {
         padding: "14px 24px", display: "flex", alignItems: "center", gap: 12,
       }}>
         <img
-          src="https://pupukkaltim.com/public/assets/files/img/logodasar.png"
-          alt="Pupuk Kaltim"
+           src="/assets/default-logo.png"
+          alt="MWX"
           style={{ height: 28, objectFit: "contain" }}
         />
         <div style={{
           width: 1, height: 20, background: "var(--border)",
         }} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#152019" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#1E293B" }}>
           Pendaftaran UMKM Binaan
         </span>
       </div>
@@ -153,12 +153,12 @@ export default function DaftarPage() {
           {/* Title */}
           <h2 style={{
             fontFamily: "var(--font-sora)", fontSize: 22, fontWeight: 800,
-            color: "#152019", marginBottom: 4,
+            color: "#1E293B", marginBottom: 4,
           }}>
             Daftar Sekarang
           </h2>
-          <p style={{ fontSize: 13, color: "#73837A", marginBottom: 24, lineHeight: 1.5 }}>
-            Isi data usaha Anda untuk bergabung sebagai UMKM binaan Pupuk Kaltim. Dapatkan akses pelatihan, pendampingan, dan berbagai manfaat lainnya.
+          <p style={{ fontSize: 13, color: "#64748B", marginBottom: 24, lineHeight: 1.5 }}>
+            Isi data usaha Anda untuk bergabung sebagai UMKM binaan MWX. Dapatkan akses pelatihan, pendampingan, dan berbagai manfaat lainnya.
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -178,7 +178,7 @@ export default function DaftarPage() {
                 placeholder="6281234567890"
                 className={input} required
               />
-              <p style={{ fontSize: 11, color: "#73837A", marginTop: 3 }}>Awali dengan 62, tanpa + atau spasi</p>
+              <p style={{ fontSize: 11, color: "#64748B", marginTop: 3 }}>Awali dengan 62, tanpa + atau spasi</p>
             </div>
 
             {/* Email */}
@@ -194,7 +194,7 @@ export default function DaftarPage() {
             <div>
               <label className={label}>Kota</label>
               <input value={form.city} onChange={e => update("city", e.target.value)}
-                placeholder="Bontang"
+                placeholder="Jakarta"
                 className={input}
               />
             </div>
@@ -249,9 +249,9 @@ export default function DaftarPage() {
                     <button key={cat} type="button" onClick={() => toggleCategory(cat)}
                       style={{
                         padding: "6px 14px", borderRadius: 999, fontSize: 12.5, fontWeight: 600,
-                        border: selected ? "2px solid #1F9D5A" : "1px solid var(--border)",
-                        background: selected ? "#DFF5E8" : "#fff",
-                        color: selected ? "#1F9D5A" : "#3C4A42",
+                        border: selected ? "2px solid #2563EB" : "1px solid var(--border)",
+                        background: selected ? "#EFF6FF" : "#fff",
+                        color: selected ? "#2563EB" : "#475569",
                         cursor: "pointer", transition: "all 0.12s",
                       }}
                     >

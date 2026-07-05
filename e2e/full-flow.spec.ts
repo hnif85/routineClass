@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env.local') });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: 'kaltim' } });
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: 'routine_class' } });
 
 const TAG = 'E2ETest';
 

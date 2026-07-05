@@ -73,11 +73,26 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
       // 4. Check is_open
       if (!binding.is_open) { setStep("closed"); setErrorMsg("Test ini sedang ditutup oleh admin."); return; }
 
-      // 5. Check open_time criteria
+      // 5. Check phase type (pre/post)
+      const { data: phaseInfo } = await s.from("test_phases").select("phase").eq("id", phase_id).single();
+      const isPostPhase = phaseInfo?.phase === "post";
+
+      // 6. Check open_time criteria
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const start = ev.start_date ? new Date(ev.start_date) : null;
       const end = ev.end_date ? new Date(ev.end_date) : null;
+
+      // H+2 auto-close: post-test ditutup 2 hari setelah event selesai
+      if (isPostPhase && end) {
+        const closeDate = new Date(end);
+        closeDate.setDate(closeDate.getDate() + 2);
+        if (today > closeDate) {
+          setStep("closed");
+          setErrorMsg("Post-Test sudah ditutup (H+2 setelah event selesai).");
+          return;
+        }
+      }
 
       if (binding.open_time === "before" && start && today >= start) {
         setStep("closed");
@@ -210,7 +225,7 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
   // ── Styles ──
   const pageStyle: React.CSSProperties = {
     position: "fixed", inset: 0, zIndex: 9999,
-    background: "#F5F6F2", overflowY: "auto",
+    background: "#F4F7FC", overflowY: "auto",
     fontFamily: "var(--font-jakarta)",
   };
   const cardStyle: React.CSSProperties = {
@@ -218,19 +233,19 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
   };
   const boxStyle: React.CSSProperties = {
     background: "#fff", borderRadius: 18, padding: 28,
-    border: "1px solid #E7EAE2", boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+    border: "1px solid #E2E8F0", boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
     marginBottom: 20,
   };
   const btnStyle: React.CSSProperties = {
     padding: "12px 32px", fontSize: 15, fontWeight: 700,
-    background: "#0F3D2B", color: "#fff", border: "none",
+    background: "#1E3A5F", color: "#fff", border: "none",
     borderRadius: 12, cursor: "pointer",
     boxShadow: "0 8px 20px -8px rgba(15,61,43,0.5)",
     transition: "all 0.15s", width: "100%",
   };
   const inputStyle: React.CSSProperties = {
     width: "100%", padding: "12px 14px", fontSize: 15,
-    border: "1.5px solid #E7EAE2", borderRadius: 12,
+    border: "1.5px solid #E2E8F0", borderRadius: 12,
     outline: "none", boxSizing: "border-box",
     background: "#FAFAF8", fontFamily: "var(--font-jakarta)",
   };
@@ -241,16 +256,16 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
         {/* Brand mark */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style={{ display: "inline-block" }}>
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#0F3D2B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#1E3A5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#73837A", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 6 }}>
             UMKM Connect
           </div>
         </div>
 
         {step === "loading" && (
           <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ fontSize: 14, color: "#73837A" }}>Memuat...</div>
+            <div style={{ fontSize: 14, color: "#64748B" }}>Memuat...</div>
           </div>
         )}
 
@@ -268,7 +283,7 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
             <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 22, fontWeight: 800, margin: "0 0 12px" }}>
               Test Belum Tersedia
             </h2>
-            <p style={{ color: "#3C4A42", fontSize: 14, margin: 0, lineHeight: 1.6 }}>{errorMsg}</p>
+            <p style={{ color: "#475569", fontSize: 14, margin: 0, lineHeight: 1.6 }}>{errorMsg}</p>
           </div>
         )}
 
@@ -277,27 +292,27 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
             <div style={{
               display: "inline-block", fontSize: 10, fontWeight: 700, textTransform: "uppercase",
               padding: "2px 8px", borderRadius: 5, marginBottom: 12,
-              background: phase.test.type === "test" ? "#DFF5E8" : "#FBEFD6",
-              color: phase.test.type === "test" ? "#1F9D5A" : "#B57A1E",
+              background: phase.test.type === "test" ? "#EFF6FF" : "#FBEFD6",
+              color: phase.test.type === "test" ? "#2563EB" : "#B57A1E",
             }}>
               {phase.test.type === "test" ? "PRE / POST TEST" : "KUESIONER"}
             </div>
             <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 24, fontWeight: 800, margin: "0 0 6px" }}>
               {phase.label}
             </h2>
-            <p style={{ fontSize: 13, color: "#73837A", margin: "0 0 4px" }}>
+            <p style={{ fontSize: 13, color: "#64748B", margin: "0 0 4px" }}>
               {event.title}
             </p>
             {phase.test.description && (
-              <p style={{ fontSize: 13, color: "#3C4A42", margin: "0 0 20px", lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: "#475569", margin: "0 0 20px", lineHeight: 1.5 }}>
                 {phase.test.description}
               </p>
             )}
-            <p style={{ fontSize: 12, color: "#73837A", margin: "0 0 16px" }}>
+            <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 16px" }}>
               {questions.length} soal • {questions.filter(q => q.question_type === "multiple_choice").length} pilihan ganda • {questions.filter(q => q.question_type === "essay").length} esai
             </p>
 
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#3C4A42", display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: "#475569", display: "block", marginBottom: 6 }}>
               Email Peserta *
             </label>
             <input
@@ -322,14 +337,14 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
               <div style={{
                 display: "inline-block", fontSize: 10, fontWeight: 700, textTransform: "uppercase",
                 padding: "2px 8px", borderRadius: 5, marginBottom: 8,
-                background: "#DFF5E8", color: "#1F9D5A",
+                background: "#EFF6FF", color: "#2563EB",
               }}>
                 {phase?.test.type === "test" ? "Pre/Post Test" : "Kuesioner"}
               </div>
               <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 20, fontWeight: 800, margin: "0 0 4px" }}>
                 {phase?.label}
               </h2>
-              <p style={{ fontSize: 13, color: "#73837A", margin: 0 }}>
+              <p style={{ fontSize: 13, color: "#64748B", margin: 0 }}>
                 Selamat mengerjakan, {umkmName}!
               </p>
             </div>
@@ -339,18 +354,18 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{
                     minWidth: 26, height: 26, borderRadius: "50%",
-                    background: "#0F3D2B", color: "#fff",
+                    background: "#1E3A5F", color: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 2,
                   }}>
                     {i + 1}
                   </span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 14.5, fontWeight: 600, margin: "0 0 4px", lineHeight: 1.5, color: "#152019" }}>
+                    <p style={{ fontSize: 14.5, fontWeight: 600, margin: "0 0 4px", lineHeight: 1.5, color: "#1E293B" }}>
                       {q.question_text}
                     </p>
                     {q.points > 1 && (
-                      <span style={{ fontSize: 11, color: "#73837A" }}>{q.points} poin</span>
+                      <span style={{ fontSize: 11, color: "#64748B" }}>{q.points} poin</span>
                     )}
                   </div>
                 </div>
@@ -361,10 +376,10 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
                       <label key={oi} style={{
                         display: "flex", alignItems: "center", gap: 10,
                         padding: "10px 14px", borderRadius: 10,
-                        border: `1.5px solid ${answers[q.id] === opt ? "#2FB36B" : "#E7EAE2"}`,
+                        border: `1.5px solid ${answers[q.id] === opt ? "#3B82F6" : "#E2E8F0"}`,
                         background: answers[q.id] === opt ? "#F6FEF8" : "#fff",
                         cursor: "pointer", transition: "all 0.12s",
-                        fontSize: 14, color: "#152019",
+                        fontSize: 14, color: "#1E293B",
                       }}>
                         <input
                           type="radio"
@@ -372,7 +387,7 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
                           value={opt}
                           checked={answers[q.id] === opt}
                           onChange={() => setAnswer(q.id, opt)}
-                          style={{ accentColor: "#2FB36B", margin: 0 }}
+                          style={{ accentColor: "#3B82F6", margin: 0 }}
                         />
                         {opt}
                       </label>
@@ -417,22 +432,22 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
           <div style={{ ...boxStyle, textAlign: "center", padding: "48px 28px" }}>
             <div style={{
               width: 56, height: 56, borderRadius: "50%",
-              background: "#DFF5E8", display: "flex",
+              background: "#EFF6FF", display: "flex",
               alignItems: "center", justifyContent: "center",
               margin: "0 auto 16px",
             }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 22, fontWeight: 800, margin: "0 0 8px" }}>
               Jawaban Tersimpan
             </h2>
-            <p style={{ fontSize: 14, color: "#3C4A42", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 14, color: "#475569", margin: 0, lineHeight: 1.6 }}>
               Terima kasih, {umkmName}!<br />
               Jawaban Anda untuk <strong>{phase?.label}</strong> sudah tercatat.
             </p>
-            <p style={{ fontSize: 12, color: "#73837A", marginTop: 16 }}>
+            <p style={{ fontSize: 12, color: "#64748B", marginTop: 16 }}>
               Anda bisa tutup halaman ini.
             </p>
           </div>
@@ -453,11 +468,11 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
             <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 22, fontWeight: 800, margin: "0 0 8px" }}>
               Sudah Pernah Diisi
             </h2>
-            <p style={{ fontSize: 14, color: "#3C4A42", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 14, color: "#475569", margin: 0, lineHeight: 1.6 }}>
               Halo, {umkmName}!<br />
               Jawaban Anda untuk <strong>{phase?.label}</strong> sudah tercatat sebelumnya. Tidak bisa mengisi ulang.
             </p>
-            <p style={{ fontSize: 12, color: "#73837A", marginTop: 16 }}>
+            <p style={{ fontSize: 12, color: "#64748B", marginTop: 16 }}>
               Silakan tutup halaman ini.
             </p>
           </div>

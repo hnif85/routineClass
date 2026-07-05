@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { createHmac, timingSafeEqual } from "crypto";
 
 // Tools yang tersedia untuk agentic query
 const TOOLS = [
@@ -43,7 +44,7 @@ function classifyIntent(message: string): {
 
   // FAQ
   if (/^(halo|hi|hai|assalam|pagi|siang|sore|malam)/.test(msg)) {
-    return { intent: "faq", confidence: 0.95, response: "Halo! Saya Kak Tani, asisten virtual Pupuk Kaltim. Ada yang bisa saya bantu?\n\nAnda bisa:\n- Cek event mendatang: ketik \"event\"\n- Cek profil UMKM: ketik \"profil [nama]\"\n- Daftar event: ketik \"daftar [nama event]\"\n- Bicara admin: ketik \"admin\"" };
+    return { intent: "faq", confidence: 0.95, response: "Halo! Saya Kak Tani, asisten virtual MWX. Ada yang bisa saya bantu?\n\nAnda bisa:\n- Cek event mendatang: ketik \"event\"\n- Cek profil UMKM: ketik \"profil [nama]\"\n- Daftar event: ketik \"daftar [nama event]\"\n- Bicara admin: ketik \"admin\"" };
   }
   if (msg.includes("event") || msg.includes("pelatihan") || msg.includes("acara") || msg.includes("jadwal")) {
     return { intent: "query_events", confidence: 0.85 };
@@ -122,6 +123,24 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Verify WhatsApp webhook signature (Meta Cloud API)
+  // https://developers.facebook.com/docs/graph-api/webhooks/getting-started#validate-payloads
+  const appSecret = process.env.WHATSAPP_APP_SECRET;
+  if (appSecret) {
+    const signature = req.headers.get("x-hub-signature-256");
+    if (!signature) return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+
+    const rawBody = await req.text();
+    const expected = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
+    if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+    // Re-parse body from raw
+    req = new NextRequest(req.url, { method: "POST", body: rawBody, headers: req.headers });
+  } else {
+    console.warn("[wa-webhook] WHATSAPP_APP_SECRET not set — skipping signature verification. Set this in production!");
+  }
+
   const supabase = await createServerSupabase();
 
   try {

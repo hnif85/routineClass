@@ -214,13 +214,13 @@ export default function MaterialDetailPage() {
       }}>
         <div style={{
           padding: '14px 16px', borderBottom: '1px solid var(--border)',
-          background: '#F8F9F5',
+          background: '#F8FAFE',
         }}>
-          <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 12, fontWeight: 700, marginBottom: 2, color: '#73837A' }}>
+          <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 12, fontWeight: 700, marginBottom: 2, color: '#64748B' }}>
             DAFTAR SESI
           </h3>
           {mat && (
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#152019', margin: 0, lineHeight: 1.3 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, lineHeight: 1.3 }}>
               {mat.title}
             </p>
           )}
@@ -229,7 +229,7 @@ export default function MaterialDetailPage() {
               <div onClick={() => setDescOpen(!descOpen)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
-                  fontSize: 10.5, fontWeight: 700, color: '#73837A', marginTop: 10, marginBottom: 4,
+                  fontSize: 10.5, fontWeight: 700, color: '#64748B', marginTop: 10, marginBottom: 4,
                   textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -239,7 +239,7 @@ export default function MaterialDetailPage() {
                 Deskripsi
               </div>
               {descOpen && (
-                <p style={{ fontSize: 11.5, color: '#3C4A42', lineHeight: 1.5, margin: '0 0 4px 0' }}>
+                <p style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5, margin: '0 0 4px 0' }}>
                   {mat.description}
                 </p>
               )}
@@ -249,11 +249,11 @@ export default function MaterialDetailPage() {
 
         <div style={{ flex: 1, overflow: 'auto', padding: '8px 8px' }}>
           {!mat ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#73837A' }}>
+            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
               Pilih materi dari daftar
             </div>
           ) : contentDays.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#73837A' }}>
+            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
               Belum ada sesi
             </div>
           ) : (
@@ -263,20 +263,20 @@ export default function MaterialDetailPage() {
                 style={{
                   padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
                   marginBottom: 3, transition: 'all 0.12s',
-                  background: selectedIdx === i ? '#DFF5E8' : 'transparent',
+                  background: selectedIdx === i ? '#EFF6FF' : 'transparent',
                   border: selectedIdx === i ? '1px solid #A8DFC1' : '1px solid transparent',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: 999,
-                    background: '#DFF5E8', color: '#1F9D5A',
+                    background: '#EFF6FF', color: '#2563EB',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 10, fontWeight: 700, flex: '0 0 auto',
                   }}>
                     {i + 1}
                   </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: '#152019', lineHeight: 1.3 }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E293B', lineHeight: 1.3 }}>
                     {c.title || `Sesi ${i + 1}`}
                   </span>
                 </div>
@@ -285,11 +285,11 @@ export default function MaterialDetailPage() {
           )}
         </div>
 
-        <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border)', background: '#F8F9F5' }}>
+        <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border)', background: '#F8FAFE' }}>
           <button onClick={() => push('/materials')}
             style={{
               width: '100%', padding: '7px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-              border: '1px solid var(--border)', background: '#fff', cursor: 'pointer', color: '#152019',
+              border: '1px solid var(--border)', background: '#fff', cursor: 'pointer', color: '#1E293B',
             }}>
             ← Ke Library
           </button>
@@ -299,13 +299,13 @@ export default function MaterialDetailPage() {
       {/* ═══ Right: Detail ═══ */}
       <div style={{ flex: 1, minWidth: 0, marginLeft: 16, overflow: 'auto' }}>
         {loading ? (
-          <div style={{ padding: 48, textAlign: 'center', color: '#73837A', fontSize: 14 }}>Memuat...</div>
+          <div style={{ padding: 48, textAlign: 'center', color: '#64748B', fontSize: 14 }}>Memuat...</div>
         ) : !mat ? (
           <div style={{
             background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
             padding: 48, textAlign: 'center', boxShadow: 'var(--shadow)',
           }}>
-            <p style={{ color: '#73837A', fontSize: 14 }}>Materi tidak ditemukan.</p>
+            <p style={{ color: '#64748B', fontSize: 14 }}>Materi tidak ditemukan.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -329,13 +329,29 @@ export default function MaterialDetailPage() {
                 </h2>
               )}
               <div style={{ display: 'flex', gap: 6, flex: '0 0 auto' }}>
+                {!editing && mat.file_url && (
+                  <a href={mat.file_url} target="_blank" rel="noopener"
+                    title="Download slide asli"
+                    style={{
+                      padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                      border: '1px solid var(--border)', background: '#fff', cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#2563EB', textDecoration: 'none',
+                    }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Slide
+                  </a>
+                )}
                 {!editing && (
                   <button onClick={exportPptx} disabled={exporting}
                     title="Simpan sebagai PPTX"
                     style={{
                       padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                       border: '1px solid var(--border)', background: '#fff', cursor: 'pointer',
-                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#152019',
+                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#1E293B',
                     }}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -350,7 +366,7 @@ export default function MaterialDetailPage() {
                   style={{
                     padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                     border: 'none', cursor: 'pointer', color: '#fff',
-                    background: editing ? '#DC2626' : '#0F3D2B',
+                    background: editing ? '#DC2626' : '#1E3A5F',
                     display: 'inline-flex', alignItems: 'center', gap: 5,
                   }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
@@ -375,13 +391,13 @@ export default function MaterialDetailPage() {
                 background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
                 padding: 14, boxShadow: 'var(--shadow)',
               }}>
-                <h4 style={{ fontSize: 11, fontWeight: 700, color: '#73837A', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deskripsi</h4>
+                <h4 style={{ fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Deskripsi</h4>
                 <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)}
-                  rows={2}
                   style={{
-                    width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 13,
+                    width: '100%', height: '100%', minHeight: 80, maxHeight: 500,
+                    padding: '10px 14px', borderRadius: 10, fontSize: 13,
                     border: '1px solid var(--border)', outline: 'none', resize: 'vertical',
-                    fontFamily: 'inherit', boxSizing: 'border-box',
+                    fontFamily: 'inherit', lineHeight: 1.6, boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -398,24 +414,24 @@ export default function MaterialDetailPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 10,
-                    background: eventStats.length > 0 ? '#DFF5E8' : '#F0F2EC',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: eventStats.length > 0 ? '#1F9D5A' : '#73837A',
+                    background: eventStats.length > 0 ? '#EFF6FF' : '#F0F2EC',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: eventStats.length > 0 ? '#2563EB' : '#64748B',
                   }}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17 }}>
                       <rect x="3" y="4" width="18" height="17" rx="2.5" /><path d="M3 9h18M8 2v4M16 2v4" />
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: '#152019' }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: '#1E293B' }}>
                       {statsLoading ? "Memuat..." : `${eventStats.length} Event`}
                     </div>
-                    <div style={{ fontSize: 11.5, color: '#73837A', marginTop: 1 }}>
+                    <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 1 }}>
                       {statsLoading ? "" : eventStats.length === 0 ? "Belum digunakan" : `Klik untuk lihat detail`}
                     </div>
                   </div>
                 </div>
                 {eventStats.length > 0 && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#73837A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                     style={{ width: 16, height: 16, transition: 'transform 0.2s', transform: eventExpanded ? 'rotate(180deg)' : '' }}>
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
@@ -434,16 +450,16 @@ export default function MaterialDetailPage() {
                     <Link href={`/events/${es.event_id}`} style={{
                       display: 'flex', alignItems: 'center', gap: 10,
                       padding: '10px 14px', textDecoration: 'none',
-                      borderBottom: '1px solid var(--border-2)', background: '#F8F9F5',
+                      borderBottom: '1px solid var(--border-2)', background: '#F8FAFE',
                     }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15, flex: '0 0 auto' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15, flex: '0 0 auto' }}>
                         <rect x="3" y="4" width="18" height="17" rx="2.5" /><path d="M3 9h18M8 2v4M16 2v4" />
                       </svg>
-                      <span style={{ fontWeight: 700, fontSize: 13.5, color: '#152019', flex: 1 }}>{es.title}</span>
+                      <span style={{ fontWeight: 700, fontSize: 13.5, color: '#1E293B', flex: 1 }}>{es.title}</span>
                       <span style={{
                         fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
-                        background: es.status === 'ongoing' ? '#DFF5E8' : es.status === 'completed' ? '#F0F2EC' : '#FBEFD6',
-                        color: es.status === 'ongoing' ? '#1F9D5A' : es.status === 'completed' ? '#73837A' : '#92400e',
+                        background: es.status === 'ongoing' ? '#EFF6FF' : es.status === 'completed' ? '#F0F2EC' : '#FBEFD6',
+                        color: es.status === 'ongoing' ? '#2563EB' : es.status === 'completed' ? '#64748B' : '#92400e',
                       }}>{es.status}</span>
                     </Link>
                     <div style={{ padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
@@ -454,12 +470,12 @@ export default function MaterialDetailPage() {
                         </div>
                         <div style={{ fontSize: 10, color: '#3C68B5', marginTop: 2 }}>{es.preCount} jwb</div>
                       </div>
-                      <div style={{ textAlign: 'center', padding: '8px 6px', borderRadius: 10, background: es.delta !== null && es.delta > 0 ? '#DFF5E8' : '#F0F2EC' }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: es.delta !== null && es.delta > 0 ? '#1F9D5A' : '#73837A', marginBottom: 4 }}>DELTA</div>
-                        <div style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: es.delta !== null && es.delta > 0 ? '#1F9D5A' : '#73837A', lineHeight: 1 }}>
+                      <div style={{ textAlign: 'center', padding: '8px 6px', borderRadius: 10, background: es.delta !== null && es.delta > 0 ? '#EFF6FF' : '#F0F2EC' }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: es.delta !== null && es.delta > 0 ? '#2563EB' : '#64748B', marginBottom: 4 }}>DELTA</div>
+                        <div style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: es.delta !== null && es.delta > 0 ? '#2563EB' : '#64748B', lineHeight: 1 }}>
                           {es.delta !== null ? (es.delta > 0 ? `+${es.delta}` : es.delta) : '—'}
                         </div>
-                        <div style={{ fontSize: 10, color: '#73837A', marginTop: 2 }}>
+                        <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>
                           {es.delta !== null ? (es.delta > 0 ? 'Naik' : es.delta < 0 ? 'Turun' : 'Stabil') : '—'}
                         </div>
                       </div>
@@ -480,14 +496,18 @@ export default function MaterialDetailPage() {
             <div style={{
               background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
               padding: 18, boxShadow: 'var(--shadow)',
+              flex: editing ? 1 : '0 0 auto',
+              display: 'flex', flexDirection: 'column',
+              minHeight: editing ? 0 : 'auto',
+              overflow: editing ? 'hidden' : 'visible',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flex: '0 0 auto' }}>
                 <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>
                   {editing ? "Konten Materi" : selectedIdx !== null && contentDays[selectedIdx] ? `Sesi ${selectedIdx + 1}: ${contentDays[selectedIdx]?.title || ""}` : "Konten Materi"}
                 </h3>
                 {editing && (
                   <button onClick={addContentDay} style={{
-                    border: 'none', background: '#0F3D2B', color: '#fff',
+                    border: 'none', background: '#1E3A5F', color: '#fff',
                     padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer',
                   }}>
                     + Tambah Hari
@@ -495,10 +515,11 @@ export default function MaterialDetailPage() {
                 )}
               </div>
               {(editing ? editContent : contentDays).length === 0 ? (
-                <p style={{ color: '#73837A', fontSize: 13 }}>Belum ada konten.</p>
+                <p style={{ color: '#64748B', fontSize: 13 }}>Belum ada konten.</p>
               ) : editing ? (
-                // ── Edit mode: show all days ──
-                editContent.map((c: any, i: number) => (
+                // ── Edit mode: scroll within card ──
+                <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                {editContent.map((c: any, i: number) => (
                   <details key={i} style={{ marginBottom: 8 }} open={true}>
                     <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 13, padding: '6px 0' }}>
                       Hari {c.day}: <input value={c.title || ""}
@@ -516,21 +537,24 @@ export default function MaterialDetailPage() {
                     }}>
                       <textarea value={c.body || ""}
                         onChange={e => updateContentDay(i, "body", e.target.value)}
-                        rows={8}
                         style={{
-                          width: '100%', padding: '10px', borderRadius: 8, fontSize: 13,
+                          width: '100%',
+                          height: '100%',
+                          minHeight: 400,
+                          maxHeight: 500,
+                          padding: '10px', borderRadius: 8, fontSize: 13,
                           border: '1px solid var(--border)', outline: 'none', resize: 'vertical',
                           fontFamily: 'inherit', lineHeight: 1.6, boxSizing: 'border-box',
                         }}
                       />
                     </div>
                   </details>
-                ))
+                ))}</div>
               ) : selectedIdx !== null ? (
                 // ── View mode: show only selected day ──
                 (() => {
                   const day = contentDays[selectedIdx];
-                  if (!day) return <p style={{ color: '#73837A', fontSize: 13 }}>Pilih sesi dari sidebar.</p>;
+                  if (!day) return <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>;
                   return (
                     <div style={{
                       padding: '16px 20px', borderRadius: 14,
@@ -542,22 +566,22 @@ export default function MaterialDetailPage() {
                       }}>
                         <span style={{
                           width: 28, height: 28, borderRadius: 999,
-                          background: '#0F3D2B', color: '#fff',
+                          background: '#1E3A5F', color: '#fff',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 12, fontWeight: 700,
                         }}>{day.day}</span>
-                        <span style={{ fontWeight: 700, fontSize: 16, color: '#152019' }}>
+                        <span style={{ fontWeight: 700, fontSize: 16, color: '#1E293B' }}>
                           {day.title || `Hari ${day.day}`}
                         </span>
                       </div>
-                      <div style={{ whiteSpace: 'pre-wrap', color: '#3C4A42' }}>
+                      <div style={{ whiteSpace: 'pre-wrap', color: '#475569' }}>
                         {typeof day.body === 'string' ? day.body : JSON.stringify(day.body)}
                       </div>
                     </div>
                   );
                 })()
               ) : (
-                <p style={{ color: '#73837A', fontSize: 13 }}>Pilih sesi dari sidebar.</p>
+                <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>
               )}
             </div>
           </div>

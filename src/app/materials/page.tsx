@@ -37,6 +37,8 @@ export default function MaterialsPage() {
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadGenerating, setUploadGenerating] = useState(false);
   const [uploadResult, setUploadResult] = useState<any>(null);
+  const [uploadPptxResult, setUploadPptxResult] = useState<any>(null);
+  const [uploadPptxLoading, setUploadPptxLoading] = useState(false);
 
   const [mode, setMode] = useState<"choose" | "ai" | "manual" | "upload">("choose");
 
@@ -132,8 +134,30 @@ export default function MaterialsPage() {
   }
 
   // ── Upload / Copy-Paste handlers ──
-  function handleFileSelect(file: File) {
+  async function handleFileSelect(file: File) {
     setUploadFileName(file.name);
+    // PPTX → auto-upload via API
+    if (file.name.match(/\.pptx?$/i)) {
+      setUploadPptxLoading(true);
+      setUploadPptxResult(null);
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/materials/upload", { method: "POST", body: formData });
+        const json = await res.json();
+        if (json.success) {
+          setUploadPptxResult(json);
+          setUploadTitle(json.material.title);
+          toast.success(`PPTX diproses! ${json.material.slides} slide → ${json.test ? "Test siap" : "Tanpa test"}`);
+          loadMaterials();
+        } else {
+          toast.error(json.error || "Gagal upload PPTX");
+        }
+      } catch (e: any) { toast.error("Error: " + e.message); }
+      setUploadPptxLoading(false);
+      return;
+    }
+    // Text file → read as text
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
@@ -202,6 +226,8 @@ export default function MaterialsPage() {
     setUploadRaw("");
     setUploadFileName("");
     setUploadResult(null);
+    setUploadPptxResult(null);
+    setUploadPptxLoading(false);
     setModalMode("ai");
     setMode("choose");
   }
@@ -216,13 +242,13 @@ export default function MaterialsPage() {
       {/* Page Head */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB' }}>
             Perpustakaan Materi
           </div>
           <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 6 }}>
             Materi
           </h2>
-          <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>
+          <p style={{ color: '#64748B', fontSize: 13.5, marginTop: 6 }}>
             {loading ? "Memuat..." : `${materials.length} materi tersimpan`}
           </p>
         </div>
@@ -240,7 +266,7 @@ export default function MaterialsPage() {
       {/* Search */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ position: 'relative', maxWidth: 360 }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#73837A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
             style={{ width: 15, height: 15, position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
           </svg>
@@ -261,7 +287,7 @@ export default function MaterialsPage() {
           background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
           padding: 48, textAlign: 'center', boxShadow: 'var(--shadow)',
         }}>
-          <p style={{ color: '#73837A', fontSize: 14 }}>
+          <p style={{ color: '#64748B', fontSize: 14 }}>
             {search ? "Tidak ada materi yang cocok." : "Belum ada materi. Klik 'Buat Materi Baru' untuk mulai."}
           </p>
         </div>
@@ -279,9 +305,9 @@ export default function MaterialsPage() {
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
-                background: '#DFF5E8', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                   <path d="M20 2v20H6.5A2.5 2.5 0 0 1 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H20Z" />
                 </svg>
@@ -289,24 +315,24 @@ export default function MaterialsPage() {
               <span style={{
                 fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 5,
                 background: m.is_ai_generated ? '#E7EEFB' : '#F0F2EC',
-                color: m.is_ai_generated ? '#3C68B5' : '#73837A',
+                color: m.is_ai_generated ? '#3C68B5' : '#64748B',
               }}>
                 {m.is_ai_generated ? 'AI' : 'Manual'}
               </span>
             </div>
 
             {/* Title + desc */}
-            <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 15, fontWeight: 700, color: '#152019', marginBottom: 4, lineHeight: 1.3 }}>
+            <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 15, fontWeight: 700, color: '#1E293B', marginBottom: 4, lineHeight: 1.3 }}>
               {m.title}
             </h3>
             {m.description && (
-              <p style={{ fontSize: 12.5, color: '#3C4A42', marginBottom: 10, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <p style={{ fontSize: 12.5, color: '#475569', marginBottom: 10, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {m.description}
               </p>
             )}
 
             {/* Meta */}
-            <div style={{ display: 'flex', gap: 10, fontSize: 11.5, color: '#73837A', marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 10, fontSize: 11.5, color: '#64748B', marginBottom: 14 }}>
               <span>{m.total_days || 1} hari</span>
               <span>{Array.isArray(m.content) ? m.content.length : 0} sesi</span>
               <span>{new Date(m.created_at).toLocaleDateString("id-ID")}</span>
@@ -343,7 +369,7 @@ export default function MaterialsPage() {
           padding: '40px 20px',
         }} onClick={e => { if (e.target === e.currentTarget) { closeModal(); } }}>
           <div style={{
-            background: '#F5F6F2', borderRadius: 20,
+            background: '#F4F7FC', borderRadius: 20,
             width: '100%', maxWidth: modalMode === "detail" ? 800 : 640,
             maxHeight: '85vh', overflowY: 'auto',
             display: 'flex', flexDirection: 'column',
@@ -360,7 +386,7 @@ export default function MaterialsPage() {
                 {modalMode === "detail" ? "Detail Materi" : mode === "choose" ? "Buat Materi Baru" : mode === "ai" ? "Buat dengan AI" : "Manual"}
               </h3>
               <button onClick={closeModal}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#73837A', fontSize: 20 }}>
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748B', fontSize: 20 }}>
                 ✕
               </button>
             </div>
@@ -371,12 +397,12 @@ export default function MaterialsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: 18 }}>
                     <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{aiResult.title}</h3>
-                    {aiResult.description && <p style={{ fontSize: 13, color: '#3C4A42', lineHeight: 1.5 }}>{aiResult.description}</p>}
+                    {aiResult.description && <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.5 }}>{aiResult.description}</p>}
                   </div>
 
                   {(aiResult.syllabus?.length > 0) && (
                     <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden' }}>
-                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5', fontWeight: 700, fontSize: 14 }}>
+                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#F8FAFE', fontWeight: 700, fontSize: 14 }}>
                         Silabus
                       </div>
                       <div style={{ padding: 12 }}>
@@ -388,12 +414,12 @@ export default function MaterialsPage() {
                           }}>
                             <span style={{
                               width: 24, height: 24, borderRadius: 999,
-                              background: '#DFF5E8', color: '#1F9D5A',
+                              background: '#EFF6FF', color: '#2563EB',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               fontSize: 11, fontWeight: 700,
                             }}>{s.day}</span>
                             <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{s.topic}</span>
-                            <span style={{ fontSize: 11.5, color: '#73837A' }}>{s.duration}</span>
+                            <span style={{ fontSize: 11.5, color: '#64748B' }}>{s.duration}</span>
                           </div>
                         ))}
                       </div>
@@ -427,11 +453,11 @@ export default function MaterialsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {/* AI */}
                   <div style={{ border: '1px solid var(--border)', borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8FAFE' }}>
                       <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Buat dengan AI</h4>
                     </div>
                     <div style={{ padding: 14 }}>
-                      <p style={{ fontSize: 12.5, color: '#73837A', marginBottom: 10 }}>
+                      <p style={{ fontSize: 12.5, color: '#64748B', marginBottom: 10 }}>
                         AI akan meneliti topik dan menghasilkan materi lengkap + silabus + pre/post test.
                       </p>
                       <button onClick={() => setMode("ai")}
@@ -443,11 +469,11 @@ export default function MaterialsPage() {
 
                   {/* Upload / Copy-Paste → AI Test */}
                   <div style={{ border: '1px solid var(--border)', borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8FAFE' }}>
                       <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Upload / Copy-Paste</h4>
                     </div>
                     <div style={{ padding: 14 }}>
-                      <p style={{ fontSize: 12.5, color: '#73837A', marginBottom: 10 }}>
+                      <p style={{ fontSize: 12.5, color: '#64748B', marginBottom: 10 }}>
                         Upload file teks atau copy-paste konten materi Anda. AI akan memeriksa dan membuat pre/post test.
                       </p>
                       <button onClick={() => setMode("upload")}
@@ -459,11 +485,11 @@ export default function MaterialsPage() {
 
                   {/* Manual */}
                   <div style={{ border: '1px solid var(--border)', borderRadius: 14, background: '#fff', overflow: 'hidden' }}>
-                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: '#F8FAFE' }}>
                       <h4 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>Buat Manual</h4>
                     </div>
                     <div style={{ padding: 14 }}>
-                      <p style={{ fontSize: 12.5, color: '#73837A', marginBottom: 10 }}>
+                      <p style={{ fontSize: 12.5, color: '#64748B', marginBottom: 10 }}>
                         Isi judul dan deskripsi materi secara manual.
                       </p>
                       <button onClick={() => setMode("manual")}
@@ -488,7 +514,7 @@ export default function MaterialsPage() {
                   />
                   <div style={{ display: 'flex', gap: 10 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
                       <input type="number" min={1} max={30} value={aiDays}
                         onChange={e => setAiDays(Number(e.target.value))}
                         style={{
@@ -499,7 +525,7 @@ export default function MaterialsPage() {
                       />
                     </div>
                     <div style={{ flex: 2 }}>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Tingkat</label>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Tingkat</label>
                       <select value={aiLevel} onChange={e => setAiLevel(e.target.value as any)}
                         style={{
                           width: '100%', padding: '8px 12px', borderRadius: 10,
@@ -532,7 +558,7 @@ export default function MaterialsPage() {
                   <button onClick={() => setMode("choose")}
                     style={{
                       padding: '8px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
-                      border: 'none', background: 'none', cursor: 'pointer', color: '#73837A',
+                      border: 'none', background: 'none', cursor: 'pointer', color: '#64748B',
                     }}>
                     ← Kembali
                   </button>
@@ -543,7 +569,7 @@ export default function MaterialsPage() {
               {modalMode !== "detail" && mode === "upload" && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Judul Materi</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Judul Materi</label>
                     <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
                       placeholder="Judul materi"
                       style={{
@@ -554,7 +580,7 @@ export default function MaterialsPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Deskripsi</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Deskripsi</label>
                     <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
                       placeholder="Deskripsi materi..."
                       rows={2}
@@ -566,7 +592,7 @@ export default function MaterialsPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
                     <input type="number" min={1} max={30} value={uploadDays}
                       onChange={e => setUploadDays(Number(e.target.value))}
                       style={{
@@ -576,16 +602,16 @@ export default function MaterialsPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>
-                      Upload File Teks
-                      <span style={{ fontWeight: 400, color: '#73837A' }}> (.txt)</span>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
+                      Upload File
+                      <span style={{ fontWeight: 400, color: '#64748B' }}> (.pptx, .txt)</span>
                     </label>
                     <div style={{
                       border: '2px dashed var(--border)', borderRadius: 12, padding: 12,
                       background: '#fff', textAlign: 'center', cursor: 'pointer',
                       transition: 'all 0.2s',
                     }}
-                      onDragOver={e => { e.preventDefault(); (e.currentTarget as HTMLElement).style.borderColor = '#2FB36B'; }}
+                      onDragOver={e => { e.preventDefault(); (e.currentTarget as HTMLElement).style.borderColor = '#3B82F6'; }}
                       onDragLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ''; }}
                       onDrop={e => {
                         e.preventDefault();
@@ -596,7 +622,7 @@ export default function MaterialsPage() {
                       onClick={() => {
                         const input = document.createElement('input');
                         input.type = 'file';
-                        input.accept = '.txt';
+                        input.accept = '.pptx,.txt';
                         input.onchange = (e: any) => {
                           const file = e.target?.files?.[0];
                           if (file) handleFileSelect(file);
@@ -605,11 +631,11 @@ export default function MaterialsPage() {
                       }}>
                       {uploadFileName ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
                           </svg>
-                          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#152019' }}>{uploadFileName}</span>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E293B' }}>{uploadFileName}</span>
                           <button onClick={e => { e.stopPropagation(); setUploadFileName(""); }}
                             style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#DC2626', fontSize: 16, padding: 0 }}>
                             ✕
@@ -617,18 +643,46 @@ export default function MaterialsPage() {
                         </div>
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="#73837A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                           </svg>
-                          <span style={{ fontSize: 12.5, color: '#73837A' }}>Klik atau drag file .txt di sini</span>
+                          <span style={{ fontSize: 12.5, color: '#64748B' }}>Klik atau drag file .pptx / .txt di sini</span>
                         </div>
                       )}
                     </div>
                   </div>
+                  {/* PPTX upload result */}
+                  {uploadPptxLoading && (
+                    <div style={{ padding: 12, background: '#EFF6FF', borderRadius: 10, fontSize: 13, color: '#2563EB' }}>
+                      ⏳ Memproses PPTX... (ekstrak teks + buat materi + generate test)
+                    </div>
+                  )}
+                  {uploadPptxResult && (
+                    <div style={{ padding: 14, background: '#F0FDF4', borderRadius: 10, border: '1px solid #BBF7D0' }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#166534', marginBottom: 8 }}>✅ PPTX Berhasil Diproses!</div>
+                      <div style={{ fontSize: 12, color: '#166534', lineHeight: 1.6 }}>
+                        📄 <strong>{uploadPptxResult.material.title}</strong><br />
+                        📊 {uploadPptxResult.material.slides} slide → {uploadPptxResult.material.slides} sesi<br />
+                        {uploadPptxResult.test ? `📝 Pre & Post Test siap` : `⚠️ Test tidak dapat digenerate`}
+                      </div>
+                      <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+                        <a href={`/materials/${uploadPptxResult.material.id}`} target="_blank"
+                          style={{ padding: '6px 12px', background: '#166534', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                          📖 Lihat Materi
+                        </a>
+                        {uploadPptxResult.test && (
+                          <a href={`/tests/${uploadPptxResult.test.id}`} target="_blank"
+                            style={{ padding: '6px 12px', background: '#2563EB', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                            📝 Lihat Test
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
                       atau Copy-Paste Konten Materi
                     </label>
                     <textarea value={uploadRaw} onChange={e => setUploadRaw(e.target.value)}
@@ -662,7 +716,7 @@ export default function MaterialsPage() {
                   <button onClick={() => setMode("choose")}
                     style={{
                       padding: '8px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
-                      border: 'none', background: 'none', cursor: 'pointer', color: '#73837A',
+                      border: 'none', background: 'none', cursor: 'pointer', color: '#64748B',
                     }}>
                     ← Kembali
                   </button>
@@ -674,7 +728,7 @@ export default function MaterialsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: 18 }}>
                     <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{uploadTitle}</h3>
-                    {uploadDesc && <p style={{ fontSize: 13, color: '#3C4A42', lineHeight: 1.5 }}>{uploadDesc}</p>}
+                    {uploadDesc && <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.5 }}>{uploadDesc}</p>}
                   </div>
 
                   {/* Pre-Test */}
@@ -696,10 +750,10 @@ export default function MaterialsPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                               {(q.options || []).map((opt: string, oi: number) => (
                                 <div key={oi} style={{
-                                  fontSize: 12, color: '#3C4A42', padding: '3px 8px',
-                                  borderRadius: 6, background: oi === q.correct ? '#DFF5E8' : '#FAFAF8',
+                                  fontSize: 12, color: '#475569', padding: '3px 8px',
+                                  borderRadius: 6, background: oi === q.correct ? '#EFF6FF' : '#FAFAF8',
                                 }}>
-                                  {opt} {oi === q.correct && <span style={{ color: '#1F9D5A', fontWeight: 700 }}>✓</span>}
+                                  {opt} {oi === q.correct && <span style={{ color: '#2563EB', fontWeight: 700 }}>✓</span>}
                                 </div>
                               ))}
                             </div>
@@ -728,10 +782,10 @@ export default function MaterialsPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                               {(q.options || []).map((opt: string, oi: number) => (
                                 <div key={oi} style={{
-                                  fontSize: 12, color: '#3C4A42', padding: '3px 8px',
-                                  borderRadius: 6, background: oi === q.correct ? '#DFF5E8' : '#FAFAF8',
+                                  fontSize: 12, color: '#475569', padding: '3px 8px',
+                                  borderRadius: 6, background: oi === q.correct ? '#EFF6FF' : '#FAFAF8',
                                 }}>
-                                  {opt} {oi === q.correct && <span style={{ color: '#1F9D5A', fontWeight: 700 }}>✓</span>}
+                                  {opt} {oi === q.correct && <span style={{ color: '#2563EB', fontWeight: 700 }}>✓</span>}
                                 </div>
                               ))}
                             </div>
@@ -764,8 +818,8 @@ export default function MaterialsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', padding: 18 }}>
                     <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{aiResult.title}</h3>
-                    <p style={{ fontSize: 13, color: '#3C4A42', lineHeight: 1.5 }}>{aiResult.description}</p>
-                    <div style={{ marginTop: 8, display: 'flex', gap: 12, fontSize: 12, color: '#73837A' }}>
+                    <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.5 }}>{aiResult.description}</p>
+                    <div style={{ marginTop: 8, display: 'flex', gap: 12, fontSize: 12, color: '#64748B' }}>
                       <span><strong>{aiDays}</strong> hari</span>
                       <span><strong>{aiResult.syllabus?.length || 0}</strong> sesi</span>
                       <span>Tingkat: {aiLevel}</span>
@@ -774,7 +828,7 @@ export default function MaterialsPage() {
 
                   {(aiResult.syllabus?.length > 0) && (
                     <div style={{ background: '#fff', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden' }}>
-                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#F8F9F5', fontWeight: 700, fontSize: 14 }}>
+                      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', background: '#F8FAFE', fontWeight: 700, fontSize: 14 }}>
                         Silabus
                       </div>
                       <div style={{ padding: 12 }}>
@@ -786,12 +840,12 @@ export default function MaterialsPage() {
                           }}>
                             <span style={{
                               width: 24, height: 24, borderRadius: 999,
-                              background: '#DFF5E8', color: '#1F9D5A',
+                              background: '#EFF6FF', color: '#2563EB',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               fontSize: 11, fontWeight: 700,
                             }}>{s.day}</span>
                             <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{s.topic}</span>
-                            <span style={{ fontSize: 11.5, color: '#73837A' }}>{s.duration}</span>
+                            <span style={{ fontSize: 11.5, color: '#64748B' }}>{s.duration}</span>
                           </div>
                         ))}
                       </div>
@@ -820,7 +874,7 @@ export default function MaterialsPage() {
               {modalMode !== "detail" && mode === "manual" && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Judul Materi</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Judul Materi</label>
                     <input value={manualTitle} onChange={e => setManualTitle(e.target.value)}
                       placeholder="Judul materi"
                       style={{
@@ -831,7 +885,7 @@ export default function MaterialsPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Deskripsi</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Deskripsi</label>
                     <textarea value={manualDesc} onChange={e => setManualDesc(e.target.value)}
                       placeholder="Deskripsi materi..."
                       rows={3}
@@ -843,7 +897,7 @@ export default function MaterialsPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#73837A', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>Jumlah Hari</label>
                     <input type="number" min={1} max={30} value={manualDays}
                       onChange={e => setManualDays(Number(e.target.value))}
                       style={{

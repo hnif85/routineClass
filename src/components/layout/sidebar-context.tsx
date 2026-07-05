@@ -36,8 +36,8 @@ export function AppLayout({ config, children }: { config: any; children: React.R
   const { collapsed, sidebarWidth } = useSidebar();
   const pathname = usePathname();
 
-  // Pages without sidebar: login, participant test portal, UMKM portal
-  const noSidebarPaths = ["/login", "/take/", "/portal"];
+  // Pages without sidebar: login, participant test portal, UMKM portal, public registration
+  const noSidebarPaths = ["/login", "/take/", "/portal", "/daftar"];
   const hideSidebar = noSidebarPaths.some((p) => pathname.startsWith(p));
 
   if (hideSidebar) {

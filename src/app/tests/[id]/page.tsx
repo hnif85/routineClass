@@ -116,14 +116,14 @@ export default function TestDetailPage() {
     setActiveForm({ phaseId, editId: null });
   }
 
-  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#73837A" }}>Memuat...</div>;
+  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#64748B" }}>Memuat...</div>;
   if (!test) return <div style={{ padding: 48, textAlign: "center", color: "#EF4444" }}>Test tidak ditemukan</div>;
 
   return (
     <div style={{ animation: "fade-in-up 0.5s ease-out both" }}>
       {/* Back */}
       <button onClick={() => push("/tests")} className="hover:text-[var(--ink)]" style={{
-        fontSize: 13, color: "#73837A", fontWeight: 600, cursor: "pointer",
+        fontSize: 13, color: "#64748B", fontWeight: 600, cursor: "pointer",
         border: "none", background: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 12, padding: 0,
         transition: "color 0.12s",
       }}>
@@ -135,11 +135,11 @@ export default function TestDetailPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1F9D5A", marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#2563EB", marginBottom: 4 }}>
           <span style={{
             padding: "2px 8px", borderRadius: 6, fontSize: 10.5,
-            background: test.type === "test" ? "#DFF5E8" : "#FBEFD6",
-            color: test.type === "test" ? "#1F9D5A" : "#B57A1E",
+            background: test.type === "test" ? "#EFF6FF" : "#FBEFD6",
+            color: test.type === "test" ? "#2563EB" : "#B57A1E",
             marginRight: 8,
           }}>
             {test.type === "test" ? "Test" : "Kuesioner"}
@@ -147,7 +147,7 @@ export default function TestDetailPage() {
           {test.type === "test" ? "Pre-Test & Post-Test" : "Kuesioner"}
         </div>
         <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em" }}>{test.name}</h2>
-        {test.description && <p style={{ color: "#73837A", fontSize: 13.5, marginTop: 6 }}>{test.description}</p>}
+        {test.description && <p style={{ color: "#64748B", fontSize: 13.5, marginTop: 6 }}>{test.description}</p>}
       </div>
 
       {/* Phases */}
@@ -165,12 +165,12 @@ export default function TestDetailPage() {
               {/* Phase header */}
               <div style={{
                 padding: "14px 20px", borderBottom: "1px solid var(--border)",
-                background: "#F8F9F5", display: "flex", alignItems: "center", justifyContent: "space-between",
+                background: "#F8FAFE", display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <h3 style={{ fontFamily: "var(--font-sora)", fontSize: 16, fontWeight: 700 }}>{phase.label}</h3>
                   <span style={{
-                    fontSize: 11, fontWeight: 700, color: "#73837A",
+                    fontSize: 11, fontWeight: 700, color: "#64748B",
                     background: "#F0F2EC", padding: "2px 8px", borderRadius: 999,
                   }}>
                     {phase.questions.length} soal
@@ -179,14 +179,14 @@ export default function TestDetailPage() {
                 <button onClick={() => startAdd(phase.id)} style={{
                   padding: "6px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                   border: "1px solid var(--border)", background: "#fff", cursor: "pointer",
-                  color: "#1F9D5A",
+                  color: "#2563EB",
                 }}>+ Tambah Soal</button>
               </div>
 
               {/* Questions */}
               <div style={{ padding: "12px 20px" }}>
                 {phase.questions.length === 0 && !showForm && (
-                  <p style={{ color: "#73837A", fontSize: 13, textAlign: "center", padding: "16px 0" }}>
+                  <p style={{ color: "#64748B", fontSize: 13, textAlign: "center", padding: "16px 0" }}>
                     Belum ada soal.
                   </p>
                 )}
@@ -215,7 +215,7 @@ export default function TestDetailPage() {
                 {/* Form */}
                 {showForm && (
                   <div style={{
-                    background: "#F8F9F5", border: "1px solid var(--border-2)", borderRadius: 14,
+                    background: "#F8FAFE", border: "1px solid var(--border-2)", borderRadius: 14,
                     padding: 20, marginTop: 12,
                   }}>
                     <h4 style={{ fontFamily: "var(--font-sora)", fontSize: 14, fontWeight: 700, marginBottom: 16 }}>
@@ -247,7 +247,7 @@ export default function TestDetailPage() {
                             <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                               <input type="radio" name={`correct-${phase.id}`} checked={form.correct_answer === opt}
                                 onChange={() => setForm({ ...form, correct_answer: opt })}
-                                style={{ accentColor: "#0F3D2B" }} />
+                                style={{ accentColor: "#1E3A5F" }} />
                               <input value={opt} onChange={e => {
                                 const opts = [...form.options]; opts[i] = e.target.value;
                                 setForm({ ...form, options: opts, correct_answer: form.correct_answer === form.options[i] ? e.target.value : form.correct_answer });
@@ -264,10 +264,10 @@ export default function TestDetailPage() {
                           ))}
                         </div>
                         <button onClick={() => setForm({ ...form, options: [...form.options, ""] })}
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#1F9D5A", fontWeight: 600, fontSize: 12.5, marginTop: 8 }}>
+                          style={{ background: "none", border: "none", cursor: "pointer", color: "#2563EB", fontWeight: 600, fontSize: 12.5, marginTop: 8 }}>
                           + Tambah opsi
                         </button>
-                        <p style={{ fontSize: 11, color: "#73837A", marginTop: 4 }}>Tandai jawaban benar dengan radio button.</p>
+                        <p style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>Tandai jawaban benar dengan radio button.</p>
                       </div>
                     )}
                     <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
@@ -299,31 +299,31 @@ function QuestionCard({ q, idx, onEdit, onDelete }: { q: Question; idx: number; 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <span style={{
-              width: 24, height: 24, borderRadius: 8, background: "#DFF5E8", color: "#1F9D5A",
+              width: 24, height: 24, borderRadius: 8, background: "#EFF6FF", color: "#2563EB",
               display: "grid", placeItems: "center", fontFamily: "var(--font-sora)", fontSize: 11, fontWeight: 700,
             }}>{idx + 1}</span>
             <span style={{
               fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", padding: "2px 7px", borderRadius: 6,
               background: isMc ? "#FBEFD6" : "#E7EEFB", color: isMc ? "#B57A1E" : "#3C68B5",
             }}>{isMc ? "Pilihan Ganda" : "Esai"}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#73837A" }}>{q.points} poin</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B" }}>{q.points} poin</span>
           </div>
-          <p style={{ fontSize: 14, fontWeight: 600, color: "#152019", marginBottom: isMc ? 8 : 0 }}>{q.question_text}</p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: "#1E293B", marginBottom: isMc ? 8 : 0 }}>{q.question_text}</p>
           {isMc && q.options && (
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {(q.options as string[]).map((opt, i) => {
                 const isCorrect = opt === q.correct_answer;
                 return (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#3C4A42" }}>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#475569" }}>
                     <span style={{
                       width: 16, height: 16, borderRadius: "50%", flex: "0 0 auto",
-                      border: `2px solid ${isCorrect ? "#2FB36B" : "#D1D5DB"}`,
+                      border: `2px solid ${isCorrect ? "#3B82F6" : "#D1D5DB"}`,
                       display: "grid", placeItems: "center",
-                      background: isCorrect ? "#2FB36B" : "transparent",
+                      background: isCorrect ? "#3B82F6" : "transparent",
                     }}>
                       {isCorrect && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10 }}><path d="M5 13l4 4L19 7" /></svg>}
                     </span>
-                    <span style={{ fontWeight: isCorrect ? 700 : 400, color: isCorrect ? "#1F9D5A" : "#3C4A42" }}>{opt}{isCorrect && " ✓"}</span>
+                    <span style={{ fontWeight: isCorrect ? 700 : 400, color: isCorrect ? "#2563EB" : "#475569" }}>{opt}{isCorrect && " ✓"}</span>
                   </div>
                 );
               })}
@@ -345,7 +345,7 @@ function QuestionCard({ q, idx, onEdit, onDelete }: { q: Question; idx: number; 
 
 const inputClass = "w-full bg-white border border-[var(--border)] rounded-[10px] px-3 py-2 text-[14px] text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[rgba(47,179,107,0.35)]";
 function Label({ children }: { children: React.ReactNode }) {
-  return <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#3C4A42", marginBottom: 6, display: "block" }}>{children}</label>;
+  return <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#475569", marginBottom: 6, display: "block" }}>{children}</label>;
 }
-const iconBtnStyle: React.CSSProperties = { background: "none", border: "none", cursor: "pointer", color: "#73837A", padding: 4, borderRadius: 6, display: "grid", placeItems: "center" };
-const smallBtn: React.CSSProperties = { ...iconBtnStyle, width: 32, height: 32, background: "#F8F9F5", border: "1px solid var(--border-2)" };
+const iconBtnStyle: React.CSSProperties = { background: "none", border: "none", cursor: "pointer", color: "#64748B", padding: 4, borderRadius: 6, display: "grid", placeItems: "center" };
+const smallBtn: React.CSSProperties = { ...iconBtnStyle, width: 32, height: 32, background: "#F8FAFE", border: "1px solid var(--border-2)" };

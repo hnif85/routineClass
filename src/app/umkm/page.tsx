@@ -37,13 +37,13 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
       {/* Page Head */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB' }}>
             Data UMKM
           </div>
           <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 6 }}>
             UMKM Binaan
           </h2>
-          <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>{(count || 0).toLocaleString("id-ID")} UMKM terdaftar</p>
+          <p style={{ color: '#64748B', fontSize: 13.5, marginTop: 6 }}>{(count || 0).toLocaleString("id-ID")} UMKM terdaftar</p>
         </div>
         <div style={{ marginLeft: 'auto', marginTop: 4 }}>
           <AddUmkmButton />
@@ -64,25 +64,25 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
         marginBottom: 20,
       }}>
         <div style={{ flex: 1, minWidth: 160 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3C4A42', marginBottom: 6, display: 'block' }}>Cari</label>
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', marginBottom: 6, display: 'block' }}>Cari</label>
           <input name="search" defaultValue={search} placeholder="Nama / WA..." className={input} />
         </div>
         <div style={{ minWidth: 130 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3C4A42', marginBottom: 6, display: 'block' }}>Kategori</label>
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', marginBottom: 6, display: 'block' }}>Kategori</label>
           <select name="category" defaultValue={category} className={sel}>
             <option value="all">Semua</option>
             {ucats.map((c) => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
           </select>
         </div>
         <div style={{ minWidth: 120 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3C4A42', marginBottom: 6, display: 'block' }}>Kota</label>
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', marginBottom: 6, display: 'block' }}>Kota</label>
           <select name="city" defaultValue={city} className={sel}>
             <option value="all">Semua</option>
             {uCities.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div style={{ minWidth: 120 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3C4A42', marginBottom: 6, display: 'block' }}>Omzet</label>
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', marginBottom: 6, display: 'block' }}>Omzet</label>
           <select name="revenue" defaultValue={revenue} className={sel}>
             <option value="all">Semua</option>
             <option value="<5jt">&lt;5jt</option>
@@ -92,7 +92,7 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
           </select>
         </div>
         <div style={{ minWidth: 100 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3C4A42', marginBottom: 6, display: 'block' }}>NIB</label>
+          <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', marginBottom: 6, display: 'block' }}>NIB</label>
           <select name="has_nib" defaultValue={hasNib} className={sel}>
             <option value="all">Semua</option>
             <option value="yes">Punya</option>
@@ -117,33 +117,33 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
       }}>
         <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)', background: '#F8F9F5' }}>
+            <tr style={{ borderBottom: '1px solid var(--border)', background: '#F8FAFE' }}>
               {["Nama Usaha", "Pemilik", "WhatsApp", "Kota", "Kategori", "Omzet", "NIB", ""].map((h) => (
-                <th key={h} style={{ textAlign: 'left', padding: '12px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#73837A' }}>{h}</th>
+                <th key={h} style={{ textAlign: 'left', padding: '12px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748B' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody style={{ borderCollapse: 'collapse' }}>
             {umkmList?.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: 48, textAlign: 'center', color: '#73837A' }}>
-                  Belum ada data. <Link href="/umkm/import" style={{ color: '#0F3D2B', fontWeight: 600, textDecoration: 'underline' }}>Import CSV →</Link>
+                <td colSpan={8} style={{ padding: 48, textAlign: 'center', color: '#64748B' }}>
+                  Belum ada data. <Link href="/umkm/import" style={{ color: '#1E3A5F', fontWeight: 600, textDecoration: 'underline' }}>Import CSV →</Link>
                 </td>
               </tr>
             )}
             {umkmList?.map((u: any, i: number) => (
-              <tr key={u.id} className="hover:bg-[#F8F9F5]" style={{
+              <tr key={u.id} className="hover:bg-[#F8FAFE]" style={{
                 borderBottom: '1px solid var(--border-2)',
                 transition: 'background 0.15s',
               }}>
-                <td style={{ padding: '12px 14px', fontWeight: 700, color: '#152019' }}>
+                <td style={{ padding: '12px 14px', fontWeight: 700, color: '#1E293B' }}>
                   <Link href={`/umkm/${u.id}`} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
                     {u.business_name}
                   </Link>
                 </td>
-                <td style={{ padding: '12px 14px', color: '#3C4A42' }}>{u.full_name}</td>
-                <td style={{ padding: '12px 14px', color: '#73837A', fontSize: 13, fontFamily: 'monospace' }}>{u.whatsapp}</td>
-                <td style={{ padding: '12px 14px', color: '#3C4A42' }}>{u.city}</td>
+                <td style={{ padding: '12px 14px', color: '#475569' }}>{u.full_name}</td>
+                <td style={{ padding: '12px 14px', color: '#64748B', fontSize: 13, fontFamily: 'monospace' }}>{u.whatsapp}</td>
+                <td style={{ padding: '12px 14px', color: '#475569' }}>{u.city}</td>
                 <td style={{ padding: '12px 14px' }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {(u.business_category || []).slice(0, 2).map((c: string) => (
@@ -153,17 +153,17 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
                         fontSize: 11,
                         fontWeight: 600,
                         background: '#F0F2EC',
-                        color: '#3C4A42',
+                        color: '#475569',
                       }}>{c.replace(/_/g, " ")}</span>
                     ))}
                     {(u.business_category || []).length > 2 && (
-                      <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, color: '#73837A' }}>
+                      <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, color: '#64748B' }}>
                         +{(u.business_category || []).length - 2}
                       </span>
                     )}
                   </div>
                 </td>
-                <td style={{ padding: '12px 14px', color: '#73837A', fontSize: 13 }}>{u.monthly_revenue_estimate || "-"}</td>
+                <td style={{ padding: '12px 14px', color: '#64748B', fontSize: 13 }}>{u.monthly_revenue_estimate || "-"}</td>
                 <td style={{ padding: '12px 14px' }}>
                   {u.has_nib ? (
                     <span style={{
@@ -171,8 +171,8 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
                       borderRadius: 999,
                       fontSize: 11,
                       fontWeight: 700,
-                      background: '#DFF5E8',
-                      color: '#1F9D5A',
+                      background: '#EFF6FF',
+                      color: '#2563EB',
                     }}>Punya</span>
                   ) : (
                     <span style={{
@@ -181,7 +181,7 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
                       fontSize: 11,
                       fontWeight: 600,
                       background: '#F0F2EC',
-                      color: '#73837A',
+                      color: '#64748B',
                     }}>Belum</span>
                   )}
                 </td>
@@ -189,7 +189,7 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
                   <Link href={`/umkm/${u.id}`} className="hover:underline" style={{
                     fontSize: 13,
                     fontWeight: 600,
-                    color: '#0F3D2B',
+                    color: '#1E3A5F',
                     textDecoration: 'none',
                   }}>
                     Detail →
@@ -204,7 +204,7 @@ export default async function UmkmListPage({ searchParams }: { searchParams: Pro
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
-          <p style={{ fontSize: 13, color: '#73837A', fontWeight: 600 }}>
+          <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             Hal {page} dari {totalPages} • {(count || 0).toLocaleString("id-ID")} UMKM
           </p>
           <div style={{ display: 'flex', gap: 8 }}>

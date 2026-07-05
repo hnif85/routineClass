@@ -81,13 +81,13 @@ export default function ImportCsvPage() {
     <div style={{ animation: 'fade-in-up 0.5s ease-out both' }}>
       {/* Page Head */}
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A', marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB', marginBottom: 4 }}>
           Data UMKM
         </div>
         <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em' }}>
           Import CSV
         </h2>
-        <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>
+        <p style={{ color: '#64748B', fontSize: 13.5, marginTop: 6 }}>
           Upload file CSV untuk mendaftarkan UMKM secara massal
         </p>
       </div>
@@ -102,7 +102,7 @@ export default function ImportCsvPage() {
           textAlign: 'center',
         }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-            style={{ width: 40, height: 40, margin: '0 auto 16px', color: '#73837A', opacity: 0.5 }}>
+            style={{ width: 40, height: 40, margin: '0 auto 16px', color: '#64748B', opacity: 0.5 }}>
             <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
           </svg>
           <label style={{
@@ -111,7 +111,7 @@ export default function ImportCsvPage() {
             gap: 8,
             padding: '12px 24px',
             borderRadius: 12,
-            background: '#0F3D2B',
+            background: '#1E3A5F',
             color: '#fff',
             fontSize: 14,
             fontWeight: 700,
@@ -119,8 +119,8 @@ export default function ImportCsvPage() {
             transition: 'all 0.18s',
             boxShadow: '0 10px 22px -10px rgba(15,61,43,0.6)',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#13513A'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#0F3D2B'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#1D4ED8'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#1E3A5F'; }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
               <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
@@ -128,7 +128,7 @@ export default function ImportCsvPage() {
             Pilih File CSV
             <input type="file" accept=".csv" onChange={handleFile} className="hidden" style={{ display: 'none' }} />
           </label>
-          <p style={{ fontSize: 13, color: '#73837A', marginTop: 16, fontWeight: 500 }}>
+          <p style={{ fontSize: 13, color: '#64748B', marginTop: 16, fontWeight: 500 }}>
             Header di baris pertama. Kolom wajib: whatsapp, full_name, business_name
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function ImportCsvPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {EXPECTED.map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <label style={{ width: 180, fontSize: 13, fontWeight: 600, color: '#3C4A42', flexShrink: 0 }}>
+                  <label style={{ width: 180, fontSize: 13, fontWeight: 600, color: '#475569', flexShrink: 0 }}>
                     {f.replace(/_/g, " ")}
                   </label>
                   <select
@@ -184,9 +184,9 @@ export default function ImportCsvPage() {
             }}>
               <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#F8F9F5', borderBottom: '1px solid var(--border)' }}>
+                  <tr style={{ background: '#F8FAFE', borderBottom: '1px solid var(--border)' }}>
                     {headers.map(h => (
-                      <th key={h} style={{ padding: 8, textAlign: 'left', fontWeight: 700, color: '#73837A', textTransform: 'uppercase', fontSize: 10.5 }}>{h}</th>
+                      <th key={h} style={{ padding: 8, textAlign: 'left', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', fontSize: 10.5 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -194,7 +194,7 @@ export default function ImportCsvPage() {
                   {preview.map((r, i) => (
                     <tr key={i} style={{ borderBottom: i < preview.length - 1 ? '1px solid var(--border-2)' : 'none' }}>
                       {headers.map(h => (
-                        <td key={h} style={{ padding: 8, color: '#3C4A42', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td key={h} style={{ padding: 8, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {r[h]}
                         </td>
                       ))}
@@ -228,13 +228,13 @@ export default function ImportCsvPage() {
         }}>
           <div style={{
             width: 32, height: 32,
-            border: '3px solid #E7EAE2',
-            borderTopColor: '#0F3D2B',
+            border: '3px solid #E2E8F0',
+            borderTopColor: '#1E3A5F',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 16px',
           }} />
-          <p style={{ color: '#73837A', fontSize: 14 }}>Mengimport data...</p>
+          <p style={{ color: '#64748B', fontSize: 14 }}>Mengimport data...</p>
         </div>
       )}
 
@@ -251,9 +251,9 @@ export default function ImportCsvPage() {
             Hasil Import
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-            <div style={{ textAlign: 'center', padding: 20, borderRadius: 12, background: '#DFF5E8' }}>
-              <p className="num" style={{ fontSize: 36, fontWeight: 800, color: '#1F9D5A', letterSpacing: '-0.02em' }}>{result.success}</p>
-              <p style={{ fontSize: 13, color: '#1F9D5A', fontWeight: 600, marginTop: 4 }}>Berhasil</p>
+            <div style={{ textAlign: 'center', padding: 20, borderRadius: 12, background: '#EFF6FF' }}>
+              <p className="num" style={{ fontSize: 36, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.02em' }}>{result.success}</p>
+              <p style={{ fontSize: 13, color: '#2563EB', fontWeight: 600, marginTop: 4 }}>Berhasil</p>
             </div>
             <div style={{ textAlign: 'center', padding: 20, borderRadius: 12, background: '#FBEFD6' }}>
               <p className="num" style={{ fontSize: 36, fontWeight: 800, color: '#92400e', letterSpacing: '-0.02em' }}>{result.duplicates}</p>

@@ -55,7 +55,7 @@ export default function PhaseResultsPage() {
     setLoading(false);
   }
 
-  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#73837A" }}>Memuat...</div>;
+  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#64748B" }}>Memuat...</div>;
   if (!ev || !phase) return <div style={{ padding: 48, textAlign: "center", color: "#EF4444" }}>Data tidak ditemukan</div>;
 
   const isTest = test?.type === "test";
@@ -102,9 +102,9 @@ export default function PhaseResultsPage() {
     <div style={{ animation: "fade-in-up 0.5s ease-out both" }}>
       {/* Back */}
       <Link href={`/events/${eventId}/questions`} style={{
-        fontSize: 13, color: "#73837A", fontWeight: 600, textDecoration: "none",
+        fontSize: 13, color: "#64748B", fontWeight: 600, textDecoration: "none",
         display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 12,
-      }} className="hover:text-[#152019]">
+      }} className="hover:text-[#1E293B]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
@@ -113,20 +113,20 @@ export default function PhaseResultsPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1F9D5A", marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#2563EB", marginBottom: 4 }}>
           Hasil {isTest ? "Test" : "Kuesioner"}
         </div>
         <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em" }}>
           {phase.label}
         </h2>
-        <p style={{ color: "#73837A", fontSize: 13.5, marginTop: 4 }}>
+        <p style={{ color: "#64748B", fontSize: 13.5, marginTop: 4 }}>
           {test?.name} · {ev.title}
         </p>
       </div>
 
       {/* Quick stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
-        <StatBox label="Total Responden" value={isKues ? answers.length : Object.keys(umkmScores).length} color="#1F9D5A" />
+        <StatBox label="Total Responden" value={isKues ? answers.length : Object.keys(umkmScores).length} color="#2563EB" />
         {isTest && (
           <>
             <StatBox label="Rata-rata Skor" value={
@@ -155,20 +155,20 @@ export default function PhaseResultsPage() {
           background: "#fff", border: "1px solid var(--border)", borderRadius: 18,
           overflow: "hidden", boxShadow: "var(--shadow)", marginBottom: 24,
         }}>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", background: "#F8F9F5" }}>
+          <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", background: "#F8FAFE" }}>
             <h3 style={{ fontFamily: "var(--font-sora)", fontSize: 16, fontWeight: 700 }}>Skor Per Peserta</h3>
           </div>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "#F8F9F5", borderBottom: "1px solid var(--border)" }}>
+                <tr style={{ background: "#F8FAFE", borderBottom: "1px solid var(--border)" }}>
                   <th style={th}>#</th>
                   <th style={th}>Usaha</th>
                   <th style={th}>Pemilik</th>
                   {questions.map((q, i) => (
                     <th key={q.id} style={{ ...th, textAlign: "center", minWidth: 50 }}>S{i + 1}</th>
                   ))}
-                  <th style={{ ...th, textAlign: "center", color: "#1F9D5A" }}>Total</th>
+                  <th style={{ ...th, textAlign: "center", color: "#2563EB" }}>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,7 +191,7 @@ export default function PhaseResultsPage() {
                               {score !== undefined && score !== null ? (
                                 <span style={{
                                   fontWeight: 700,
-                                  color: isCorrect ? "#1F9D5A" : "#EF4444",
+                                  color: isCorrect ? "#2563EB" : "#EF4444",
                                 }}>
                                   {score}
                                 </span>
@@ -201,7 +201,7 @@ export default function PhaseResultsPage() {
                             </td>
                           );
                         })}
-                        <td style={{ ...td, textAlign: "center", fontWeight: 800, color: "#1F9D5A", fontFamily: "var(--font-sora)" }}>
+                        <td style={{ ...td, textAlign: "center", fontWeight: 800, color: "#2563EB", fontFamily: "var(--font-sora)" }}>
                           {u.total}
                         </td>
                       </tr>
@@ -230,11 +230,11 @@ export default function PhaseResultsPage() {
             }}>
               <div style={{
                 padding: "14px 20px", borderBottom: "1px solid var(--border)",
-                background: "#F8F9F5",
+                background: "#F8FAFE",
                 display: "flex", alignItems: "center", gap: 10,
               }}>
                 <span style={{
-                  width: 26, height: 26, borderRadius: 8, background: "#DFF5E8", color: "#1F9D5A",
+                  width: 26, height: 26, borderRadius: 8, background: "#EFF6FF", color: "#2563EB",
                   display: "grid", placeItems: "center",
                   fontFamily: "var(--font-sora)", fontSize: 12, fontWeight: 700,
                 }}>{idx + 1}</span>
@@ -242,20 +242,20 @@ export default function PhaseResultsPage() {
                   fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", padding: "2px 7px", borderRadius: 6,
                   background: isMc ? "#FBEFD6" : "#E7EEFB", color: isMc ? "#B57A1E" : "#3C68B5",
                 }}>{isMc ? "PGC" : "Esai"}</span>
-                <span style={{ fontWeight: 600, fontSize: 14, color: "#152019" }}>{q.question_text}</span>
+                <span style={{ fontWeight: 600, fontSize: 14, color: "#1E293B" }}>{q.question_text}</span>
                 {isMc && q.correct_answer && (
-                  <span style={{ fontSize: 11, color: "#1F9D5A", fontStyle: "italic" }}>
+                  <span style={{ fontSize: 11, color: "#2563EB", fontStyle: "italic" }}>
                     (Jawaban: {q.correct_answer})
                   </span>
                 )}
-                <span style={{ marginLeft: "auto", fontSize: 12, color: "#73837A" }}>
+                <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748B" }}>
                   {qAnswers.length} jawaban · {q.points} poin
                 </span>
               </div>
 
               <div style={{ padding: 16 }}>
                 {qAnswers.length === 0 ? (
-                  <p style={{ color: "#73837A", fontSize: 13, textAlign: "center", padding: 12 }}>
+                  <p style={{ color: "#64748B", fontSize: 13, textAlign: "center", padding: 12 }}>
                     Belum ada jawaban
                   </p>
                 ) : isMc ? (
@@ -268,7 +268,7 @@ export default function PhaseResultsPage() {
                         <div key={opt} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <span style={{
                             width: 16, height: 16, borderRadius: "50%", flex: "0 0 auto",
-                            background: isCorrect ? "#2FB36B" : "#E7EAE2",
+                            background: isCorrect ? "#3B82F6" : "#E2E8F0",
                             display: "grid", placeItems: "center",
                           }}>
                             {isCorrect && (
@@ -281,11 +281,11 @@ export default function PhaseResultsPage() {
                           <div style={{ flex: 1, height: 8, borderRadius: 999, background: "#F0F2EC", overflow: "hidden" }}>
                             <div style={{
                               height: "100%", borderRadius: 999, width: `${pct}%`,
-                              background: isCorrect ? "linear-gradient(90deg, #2FB36B, #1F9D5A)" : "#D1D5DB",
+                              background: isCorrect ? "linear-gradient(90deg, #3B82F6, #2563EB)" : "#D1D5DB",
                               transition: "width 0.5s",
                             }} />
                           </div>
-                          <span style={{ flex: "0 0 50px", textAlign: "right", fontSize: 12, fontWeight: 700, color: "#3C4A42" }}>
+                          <span style={{ flex: "0 0 50px", textAlign: "right", fontSize: 12, fontWeight: 700, color: "#475569" }}>
                             {count} ({pct}%)
                           </span>
                         </div>
@@ -300,19 +300,19 @@ export default function PhaseResultsPage() {
                         border: "1px solid var(--border-2)", background: "#FAFAF8",
                       }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: "#152019" }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#1E293B" }}>
                             {a.umkm?.business_name || (isKues ? "Anonim" : "-")} · {a.umkm?.full_name || ""}
                           </span>
                           {a.score !== null && (
                             <span style={{
                               fontSize: 12, fontWeight: 700,
-                              color: a.score >= q.points / 2 ? "#1F9D5A" : "#EF4444",
+                              color: a.score >= q.points / 2 ? "#2563EB" : "#EF4444",
                             }}>
                               {a.score}/{q.points}
                             </span>
                           )}
                         </div>
-                        <p style={{ fontSize: 13, color: "#3C4A42", whiteSpace: "pre-wrap" }}>{a.answer_text}</p>
+                        <p style={{ fontSize: 13, color: "#475569", whiteSpace: "pre-wrap" }}>{a.answer_text}</p>
                       </div>
                     ))}
                   </div>
@@ -333,7 +333,7 @@ function StatBox({ label, value, color }: { label: string; value: string | numbe
       background: "#fff", border: "1px solid var(--border)", borderRadius: 14,
       padding: "16px 20px", boxShadow: "var(--shadow)",
     }}>
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#73837A", letterSpacing: "0.08em", marginBottom: 6 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#64748B", letterSpacing: "0.08em", marginBottom: 6 }}>
         {label}
       </div>
       <div style={{ fontFamily: "var(--font-sora)", fontSize: 26, fontWeight: 800, color }}>
@@ -345,8 +345,8 @@ function StatBox({ label, value, color }: { label: string; value: string | numbe
 
 const th: React.CSSProperties = {
   padding: "8px 10px", textAlign: "left", fontSize: 11,
-  fontWeight: 700, textTransform: "uppercase", color: "#73837A",
+  fontWeight: 700, textTransform: "uppercase", color: "#64748B",
 };
 const td: React.CSSProperties = {
-  padding: "8px 10px", fontSize: 13, color: "#3C4A42",
+  padding: "8px 10px", fontSize: 13, color: "#475569",
 };

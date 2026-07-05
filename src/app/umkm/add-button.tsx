@@ -64,24 +64,24 @@ export default function AddUmkmButton() {
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "12px 16px", border: "none", background: "none",
-              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#152019",
+              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#1E293B",
               borderBottom: "1px solid var(--border-2)",
               transition: "background 0.12s",
             }}
-            className="hover:bg-[#F8F9F5]"
+            className="hover:bg-[#F8FAFE]"
           >
             <div style={{
               width: 32, height: 32, borderRadius: 8,
-              background: "#DFF5E8", display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#1F9D5A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>Salin Link Pendaftaran</div>
-              <div style={{ fontSize: 11.5, color: "#73837A", marginTop: 1 }}>
+              <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 1 }}>
                 Bagikan link ini ke UMKM via WA
               </div>
             </div>
@@ -96,11 +96,11 @@ export default function AddUmkmButton() {
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "12px 16px", border: "none", background: "none",
-              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#152019",
+              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#1E293B",
               borderBottom: "1px solid var(--border-2)",
               transition: "background 0.12s",
             }}
-            className="hover:bg-[#F8F9F5]"
+            className="hover:bg-[#F8FAFE]"
           >
             <div style={{
               width: 32, height: 32, borderRadius: 8,
@@ -113,7 +113,7 @@ export default function AddUmkmButton() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>Input Manual</div>
-              <div style={{ fontSize: 11.5, color: "#73837A", marginTop: 1 }}>
+              <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 1 }}>
                 Isi data UMKM satu per satu
               </div>
             </div>
@@ -124,10 +124,10 @@ export default function AddUmkmButton() {
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "12px 16px", border: "none", background: "none",
-              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#152019",
+              cursor: "pointer", fontSize: 13, textAlign: "left", color: "#1E293B",
               textDecoration: "none", transition: "background 0.12s",
             }}
-            className="hover:bg-[#F8F9F5]"
+            className="hover:bg-[#F8FAFE]"
             onClick={() => setOpen(false)}
           >
             <div style={{
@@ -140,7 +140,7 @@ export default function AddUmkmButton() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>Import CSV</div>
-              <div style={{ fontSize: 11.5, color: "#73837A", marginTop: 1 }}>
+              <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 1 }}>
                 Upload file CSV massal
               </div>
             </div>

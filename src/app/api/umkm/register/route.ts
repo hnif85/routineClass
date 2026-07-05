@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errors.join("; ") }, { status: 400 });
     }
 
-    const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "kaltim" } });
+    const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "routine_class" } });
 
     // ── Check duplicate WhatsApp ──
     const { data: existing } = await s
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       full_name: full_name.trim(),
       whatsapp: whatsapp.replace(/[\s\-]/g, ""),
       email: email?.trim() || "",
-      city: city?.trim() || "Bontang",
+      city: city?.trim() || "Jakarta",
       business_name: business_name.trim(),
       year_established: year_established ? parseInt(year_established) : null,
       monthly_revenue_estimate: monthly_revenue_estimate || null,

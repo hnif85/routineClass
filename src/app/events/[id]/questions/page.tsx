@@ -85,16 +85,16 @@ export default function EventQuestionsPage() {
     else { toast.success("Test dilepaskan"); loadData(); }
   }
 
-  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#73837A" }}>Memuat...</div>;
+  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#64748B" }}>Memuat...</div>;
   if (!ev) return <div style={{ padding: 48, textAlign: "center", color: "#EF4444" }}>Event tidak ditemukan</div>;
 
   return (
     <div style={{ animation: "fade-in-up 0.5s ease-out both" }}>
       {/* Back */}
       <Link href={`/events/${eventId}`} style={{
-        fontSize: 13, color: "#73837A", fontWeight: 600, textDecoration: "none",
+        fontSize: 13, color: "#64748B", fontWeight: 600, textDecoration: "none",
         display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 12,
-      }} className="hover:text-[#152019]">
+      }} className="hover:text-[#1E293B]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
@@ -103,13 +103,13 @@ export default function EventQuestionsPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1F9D5A", marginBottom: 4 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#2563EB", marginBottom: 4 }}>
           Test & Kuesioner Terikat
         </div>
         <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em" }}>
           {ev.title}
         </h2>
-        <p style={{ color: "#73837A", fontSize: 13.5, marginTop: 6 }}>
+        <p style={{ color: "#64748B", fontSize: 13.5, marginTop: 6 }}>
           {boundTests.length} test/kuesioner terikat ke event ini
         </p>
       </div>
@@ -118,21 +118,21 @@ export default function EventQuestionsPage() {
       <div style={{ display: "flex", gap: 0, marginBottom: 28, borderBottom: "1px solid var(--border)" }}>
         <Link href={`/events/${eventId}`} style={{
           padding: "10px 20px", fontSize: 13.5, fontWeight: 600, textDecoration: "none",
-          color: "#73837A", borderBottom: "2px solid transparent", transition: "all 0.15s",
+          color: "#64748B", borderBottom: "2px solid transparent", transition: "all 0.15s",
         }}>
           Detail & Undangan
         </Link>
-        <span style={{ padding: "10px 20px", fontSize: 13.5, fontWeight: 700, color: "#1F9D5A", borderBottom: "2px solid #1F9D5A" }}>
+        <span style={{ padding: "10px 20px", fontSize: 13.5, fontWeight: 700, color: "#2563EB", borderBottom: "2px solid #2563EB" }}>
           Test & Hasil
         </span>
       </div>
 
       {boundTests.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#73837A", background: "#fff", borderRadius: 18, border: "1px solid var(--border)" }}>
+        <div style={{ textAlign: "center", padding: 60, color: "#64748B", background: "#fff", borderRadius: 18, border: "1px solid var(--border)" }}>
           <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Belum ada test terikat</p>
           <p style={{ fontSize: 13 }}>
             Binding test ke event ini dari halaman{" "}
-            <Link href={`/events/${eventId}`} style={{ color: "#1F9D5A", fontWeight: 700 }}>detail event</Link>.
+            <Link href={`/events/${eventId}`} style={{ color: "#2563EB", fontWeight: 700 }}>detail event</Link>.
           </p>
         </div>
       ) : (
@@ -152,7 +152,7 @@ export default function EventQuestionsPage() {
                 <div style={{
                   padding: "16px 20px",
                   borderBottom: "1px solid var(--border)",
-                  background: "#F8F9F5",
+                  background: "#F8FAFE",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -161,21 +161,21 @@ export default function EventQuestionsPage() {
                     <span style={{
                       fontSize: 10.5, fontWeight: 700, textTransform: "uppercase",
                       padding: "2px 8px", borderRadius: 6,
-                      background: isTest ? "#DFF5E8" : "#FBEFD6",
-                      color: isTest ? "#1F9D5A" : "#B57A1E",
+                      background: isTest ? "#EFF6FF" : "#FBEFD6",
+                      color: isTest ? "#2563EB" : "#B57A1E",
                     }}>
                       {isTest ? "Test" : "Kuesioner"}
                     </span>
                     <h3 style={{ fontFamily: "var(--font-sora)", fontSize: 16, fontWeight: 700 }}>
                       {bt.test_phases.label}
                     </h3>
-                    <span style={{ fontSize: 12, color: "#73837A" }}>{test.name}</span>
+                    <span style={{ fontSize: 12, color: "#64748B" }}>{test.name}</span>
                   </div>
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <span style={{
                       fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
-                      background: bt.open_time === "before" ? "#E7EEFB" : bt.open_time === "during" ? "#DFF5E8" : "#F0F2EC",
-                      color: bt.open_time === "before" ? "#3C68B5" : bt.open_time === "during" ? "#1F9D5A" : "#73837A",
+                      background: bt.open_time === "before" ? "#E7EEFB" : bt.open_time === "during" ? "#EFF6FF" : "#F0F2EC",
+                      color: bt.open_time === "before" ? "#3C68B5" : bt.open_time === "during" ? "#2563EB" : "#64748B",
                     }}>
                       {bt.open_time === "before" ? "Sebelum" : bt.open_time === "during" ? "Saat" : "Setelah"}
                     </span>
@@ -183,8 +183,8 @@ export default function EventQuestionsPage() {
                       style={{
                         padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                         border: "none", cursor: "pointer",
-                        background: bt.is_open ? "#2FB36B" : "#E7EAE2",
-                        color: bt.is_open ? "#fff" : "#73837A",
+                        background: bt.is_open ? "#3B82F6" : "#E2E8F0",
+                        color: bt.is_open ? "#fff" : "#64748B",
                       }}>
                       {bt.is_open ? "Dibuka" : "Ditutup"}
                     </button>
@@ -199,17 +199,17 @@ export default function EventQuestionsPage() {
                       flex: 1, padding: "14px 16px", borderRadius: 12,
                       border: "1px solid var(--border-2)", background: "#FAFAF8",
                     }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#73837A", marginBottom: 8 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#64748B", marginBottom: 8 }}>
                         Pengisian
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-                        <span style={{ fontFamily: "var(--font-sora)", fontSize: 28, fontWeight: 800, color: "#1F9D5A" }}>
-                          {stats.done}<span style={{ fontSize: 16, color: "#73837A" }}>/{stats.total}</span>
+                        <span style={{ fontFamily: "var(--font-sora)", fontSize: 28, fontWeight: 800, color: "#2563EB" }}>
+                          {stats.done}<span style={{ fontSize: 16, color: "#64748B" }}>/{stats.total}</span>
                         </span>
                         <span style={{
                           fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999,
-                          background: pct >= 80 ? "#DFF5E8" : pct >= 50 ? "#FBEFD6" : "#F0F2EC",
-                          color: pct >= 80 ? "#1F9D5A" : pct >= 50 ? "#B57A1E" : "#73837A",
+                          background: pct >= 80 ? "#EFF6FF" : pct >= 50 ? "#FBEFD6" : "#F0F2EC",
+                          color: pct >= 80 ? "#2563EB" : pct >= 50 ? "#B57A1E" : "#64748B",
                         }}>
                           {pct}%
                         </span>
@@ -218,7 +218,7 @@ export default function EventQuestionsPage() {
                         <div style={{
                           height: "100%", borderRadius: 999,
                           width: `${pct}%`,
-                          background: "linear-gradient(90deg, #2FB36B, #1F9D5A)",
+                          background: "linear-gradient(90deg, #3B82F6, #2563EB)",
                           transition: "width 0.5s ease",
                         }} />
                       </div>
@@ -229,14 +229,14 @@ export default function EventQuestionsPage() {
                       <Link href={`/tests/${test.id}`} style={{
                         padding: "8px 16px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                         border: "1px solid var(--border)", background: "#fff", cursor: "pointer",
-                        textDecoration: "none", color: "#152019", textAlign: "center",
+                        textDecoration: "none", color: "#1E293B", textAlign: "center",
                       }}>
                         Kelola Soal
                       </Link>
                       <Link href={`/events/${eventId}/tests/${bt.phase_id}/results`} style={{
                         padding: "8px 16px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                         border: "none", cursor: "pointer", textDecoration: "none", textAlign: "center",
-                        background: "#0F3D2B", color: "#fff",
+                        background: "#1E3A5F", color: "#fff",
                       }}>
                         Lihat Hasil
                       </Link>
@@ -251,7 +251,7 @@ export default function EventQuestionsPage() {
                       }} style={{
                         padding: "8px 16px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                         border: "1px solid var(--border)", background: "#fff", cursor: "pointer",
-                        textDecoration: "none", color: "#1F9D5A", textAlign: "center",
+                        textDecoration: "none", color: "#2563EB", textAlign: "center",
                       }}>
                         Salin Link Peserta
                       </button>
@@ -276,18 +276,18 @@ export default function EventQuestionsPage() {
                             <div key={sibling.id} style={{
                               display: "flex", alignItems: "center", gap: 8,
                               padding: "8px 12px", borderRadius: 10,
-                              border: "1px solid var(--border-2)", background: "#F8F9F5",
+                              border: "1px solid var(--border-2)", background: "#F8FAFE",
                               fontSize: 12,
                             }}>
-                              <span style={{ fontWeight: 700, color: "#152019" }}>{sibling.test_phases.label}</span>
-                              <span style={{ color: "#73837A" }}>{sStats.done}/{sStats.total}</span>
+                              <span style={{ fontWeight: 700, color: "#1E293B" }}>{sibling.test_phases.label}</span>
+                              <span style={{ color: "#64748B" }}>{sStats.done}/{sStats.total}</span>
                               <div style={{
-                                width: 50, height: 4, borderRadius: 999, background: "#E7EAE2", overflow: "hidden",
+                                width: 50, height: 4, borderRadius: 999, background: "#E2E8F0", overflow: "hidden",
                               }}>
                                 <div style={{
                                   height: "100%", borderRadius: 999,
                                   width: sStats.total > 0 ? `${(sStats.done / sStats.total) * 100}%` : "0%",
-                                  background: sStats.total > 0 ? "#2FB36B" : "#E7EAE2",
+                                  background: sStats.total > 0 ? "#3B82F6" : "#E2E8F0",
                                 }} />
                               </div>
                             </div>
@@ -304,13 +304,13 @@ export default function EventQuestionsPage() {
 
       {/* Info about test management */}
       <div style={{
-        background: "#F8F9F5", border: "1px solid var(--border)", borderRadius: 14,
-        padding: 16, marginTop: 20, fontSize: 13, color: "#3C4A42",
+        background: "#F8FAFE", border: "1px solid var(--border)", borderRadius: 14,
+        padding: 16, marginTop: 20, fontSize: 13, color: "#475569",
       }}>
         <strong>Catatan:</strong> Soal dikelola di halaman{" "}
-        <Link href="/tests" style={{ color: "#1F9D5A", fontWeight: 700 }}>Master Test</Link>.
+        <Link href="/tests" style={{ color: "#2563EB", fontWeight: 700 }}>Master Test</Link>.
         Binding test ke event dilakukan saat membuat event atau dari halaman{" "}
-        <Link href={`/events/${eventId}`} style={{ color: "#1F9D5A", fontWeight: 700 }}>detail event</Link>.
+        <Link href={`/events/${eventId}`} style={{ color: "#2563EB", fontWeight: 700 }}>detail event</Link>.
       </div>
     </div>
   );

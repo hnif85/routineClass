@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_ROUTES = ["/login", "/take", "/daftar", "/_next", "/favicon.ico", "/api/auth", "/api/umkm"];
+const PUBLIC_ROUTES = ["/login", "/take", "/daftar", "/_next", "/favicon.ico", "/api/auth", "/api/umkm", "/api/daftar", "/api/wilayah"];
 const UMKM_ROUTES = ["/portal"];
-const ADMIN_ROUTES = ["/dashboard", "/events", "/umkm", "/tests", "/materials", "/wa-inbox"];
+const ADMIN_ROUTES = ["/dashboard", "/events", "/umkm", "/tests", "/materials", "/wa-inbox", "/admin"];
+const PEMATERI_ROUTES = ["/dashboard", "/events", "/materials"];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -25,13 +26,13 @@ export async function proxy(req: NextRequest) {
   }
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
     const { payload } = await jwtVerify(token, secret);
     const role = payload.role as string;
 
-    // UMKM role: allow portal & test-taking
+    // UMKM role: allow portal, test-taking, and payment API
     if (role === "umkm") {
-      if (UMKM_ROUTES.some(r => pathname.startsWith(r)) || pathname.startsWith("/take")) {
+      if (UMKM_ROUTES.some(r => pathname.startsWith(r)) || pathname.startsWith("/take") || pathname.startsWith("/api/pay")) {
         return NextResponse.next();
       }
       return NextResponse.redirect(new URL("/portal", req.url));
@@ -43,6 +44,14 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
       return NextResponse.next();
+    }
+
+    // Pemateri: materials, events, dashboard only
+    if (role === "pemateri") {
+      if (PEMATERI_ROUTES.some(r => pathname.startsWith(r))) {
+        return NextResponse.next();
+      }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     // Unknown role

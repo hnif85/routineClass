@@ -4,7 +4,7 @@ import { SignJWT } from "jose";
 import { pbkdf2Sync, randomBytes } from "crypto";
 
 function hashPassword(password: string, salt: string): string {
-  return pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+  return pbkdf2Sync(password, salt, 600_000, 64, "sha512").toString("hex");
 }
 
 function verifyPassword(password: string, hash: string): boolean {
@@ -14,6 +14,14 @@ function verifyPassword(password: string, hash: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 10 login attempts per IP per 15 minutes
+  const { checkRateLimit, getClientIp, LIMITS } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req);
+  const rl = checkRateLimit({ ...LIMITS.login, identifier: `login:${ip}` });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Terlalu banyak percobaan. Coba lagi nanti." }, { status: 429 });
+  }
+
   try {
     const { email, password } = await req.json();
     if (!email || !password) {
@@ -35,7 +43,7 @@ export async function POST(req: NextRequest) {
     await supabase.from("users").update({ last_login: new Date().toISOString() }).eq("id", user.id);
 
     // Create JWT
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
     const token = await new SignJWT({
       sub: user.id,
       email: user.email,

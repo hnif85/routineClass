@@ -25,13 +25,13 @@ export default async function WaInboxPage() {
       {/* Page Head */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB' }}>
             Pesan WhatsApp
           </div>
           <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 6 }}>
             Inbox
           </h2>
-          <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>
+          <p style={{ color: '#64748B', fontSize: 13.5, marginTop: 6 }}>
             Pantau percakapan dengan UMKM. Muncul saat UMKM chat ke bot.
           </p>
         </div>
@@ -46,7 +46,7 @@ export default async function WaInboxPage() {
           textAlign: 'center',
           boxShadow: 'var(--shadow)',
         }}>
-          <p style={{ color: '#73837A', fontSize: 14 }}>Belum ada percakapan.</p>
+          <p style={{ color: '#64748B', fontSize: 14 }}>Belum ada percakapan.</p>
         </div>
       )}
 
@@ -73,11 +73,11 @@ export default async function WaInboxPage() {
                     fontFamily: 'var(--font-sora)',
                     fontSize: 18,
                     fontWeight: 700,
-                    color: '#152019',
+                    color: '#1E293B',
                   }}>
                     {u?.business_name || "Unknown"}
                   </h3>
-                  <p style={{ fontSize: 12.5, color: '#73837A', marginTop: 2 }}>
+                  <p style={{ fontSize: 12.5, color: '#64748B', marginTop: 2 }}>
                     {u?.full_name} • {u?.whatsapp}
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export default async function WaInboxPage() {
                       ⚠ Perlu Respon
                     </span>
                   )}
-                  <span style={{ fontSize: 11, color: '#73837A', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 11, color: '#64748B', whiteSpace: 'nowrap' }}>
                     {new Date(lm?.created_at).toLocaleString("id-ID")}
                   </span>
                 </div>
@@ -109,22 +109,22 @@ export default async function WaInboxPage() {
                     fontSize: 13,
                     lineHeight: 1.45,
                     ...(m.direction === "inbound"
-                      ? { background: '#DFF5E8', border: '1px solid #A8DFC1', marginRight: 48 }
-                      : { background: '#F8F9F5', border: '1px solid var(--border)', marginLeft: 48 }),
+                      ? { background: '#EFF6FF', border: '1px solid #A8DFC1', marginRight: 48 }
+                      : { background: '#F8FAFE', border: '1px solid var(--border)', marginLeft: 48 }),
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <span style={{
                         fontSize: 10,
                         fontWeight: 700,
                         textTransform: 'uppercase',
-                        color: m.direction === "inbound" ? '#1F9D5A' : '#3C4A42',
+                        color: m.direction === "inbound" ? '#2563EB' : '#475569',
                       }}>
                         {m.direction === "inbound" ? "UMKM" : config.wa_bot_name}
                       </span>
                       {m.intent && (
                         <span style={{
                           fontSize: 10,
-                          color: '#73837A',
+                          color: '#64748B',
                           padding: '1px 6px',
                           borderRadius: 4,
                           background: '#fff',
@@ -133,11 +133,11 @@ export default async function WaInboxPage() {
                         </span>
                       )}
                     </div>
-                    <p style={{ color: '#152019' }}>{m.content}</p>
+                    <p style={{ color: '#1E293B' }}>{m.content}</p>
                   </div>
                 ))}
                 {msgs.length > 4 && (
-                  <p style={{ fontSize: 11, color: '#73837A', textAlign: 'center' }}>
+                  <p style={{ fontSize: 11, color: '#64748B', textAlign: 'center' }}>
                     +{msgs.length - 4} lainnya
                   </p>
                 )}

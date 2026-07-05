@@ -36,6 +36,11 @@ async function callDeepSeek(system: string, user: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const { checkRateLimit, getClientIp, LIMITS } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req);
+  const rl = checkRateLimit({ ...LIMITS.ai, identifier: `ai:${ip}` });
+  if (!rl.allowed) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+
   try {
     const body = await req.json();
     const { title, description, raw_content: rawContent, days = 1 } = body;

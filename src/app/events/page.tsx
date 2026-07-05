@@ -6,9 +6,9 @@ import Link from "next/link";
 
 const STATUS_STYLES: Record<string, { bg: string; fg: string }> = {
   draft: { bg: '#FBEFD6', fg: '#92400e' },
-  published: { bg: '#DFF5E8', fg: '#1F9D5A' },
-  ongoing: { bg: '#DFF5E8', fg: '#1F9D5A' },
-  completed: { bg: '#F0F2EC', fg: '#73837A' },
+  published: { bg: '#EFF6FF', fg: '#2563EB' },
+  ongoing: { bg: '#EFF6FF', fg: '#2563EB' },
+  completed: { bg: '#F0F2EC', fg: '#64748B' },
   cancelled: { bg: '#FEE2E2', fg: '#991B1B' },
 };
 
@@ -39,11 +39,19 @@ export default function EventsPage() {
   const [typeFilter, setTypeFilter] = useState("");
 
   useEffect(() => {
-    s.from("events").select("*", { count: "exact" }).order("start_date", { ascending: false }).then(({ data, count: c }) => {
-      setEvents(data || []);
-      setCount(c || 0);
-      setLoading(false);
-    });
+    s.from("events").select("*, event_invitations(count)", { count: "exact" })
+      .order("start_date", { ascending: false })
+      .then(({ data, count: c }) => {
+        // Transform: event_invitations is an array of {count} objects
+        const withCount = (data || []).map((ev: any) => ({
+          ...ev,
+          peserta_count: ev.event_invitations?.[0]?.count ?? 0,
+          event_invitations: undefined,
+        }));
+        setEvents(withCount);
+        setCount(c || 0);
+        setLoading(false);
+      });
   }, []);
 
   const filtered = events.filter(e => {
@@ -58,13 +66,13 @@ export default function EventsPage() {
       {/* Page Head */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, flexWrap: 'wrap', marginBottom: 24 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB' }}>
             Event & Pelatihan
           </div>
           <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 6 }}>
             Event
           </h2>
-          <p style={{ color: '#73837A', fontSize: 13.5, marginTop: 6 }}>
+          <p style={{ color: '#64748B', fontSize: 13.5, marginTop: 6 }}>
             {loading ? "Memuat..." : `${filtered.length} dari ${count} event`}
           </p>
         </div>
@@ -87,7 +95,7 @@ export default function EventsPage() {
         <div style={{
           flex: '1 0 200px', maxWidth: 360, position: 'relative',
         }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#73837A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
             style={{ width: 15, height: 15, position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
           </svg>
@@ -136,7 +144,7 @@ export default function EventsPage() {
           background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
           padding: 48, textAlign: 'center', boxShadow: 'var(--shadow)',
         }}>
-          <p style={{ color: '#73837A', fontSize: 14 }}>
+          <p style={{ color: '#64748B', fontSize: 14 }}>
             {search || statusFilter || typeFilter
               ? "Tidak ada event yang cocok dengan filter."
               : "Belum ada event."}
@@ -167,12 +175,12 @@ export default function EventsPage() {
                     fontFamily: 'var(--font-sora)',
                     fontSize: 20,
                     fontWeight: 700,
-                    color: '#152019',
+                    color: '#1E293B',
                     letterSpacing: '-0.01em',
                   }}>
                     {e.title}
                   </h3>
-                  <p style={{ fontSize: 13, color: '#73837A', marginTop: 4 }}>
+                  <p style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>
                     {d.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                     {e.start_time && ` • ${e.start_time}`}
                   </p>
@@ -190,7 +198,7 @@ export default function EventsPage() {
               </div>
 
               {/* Meta */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12.5, color: '#73837A', marginBottom: 12 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12.5, color: '#64748B', marginBottom: 12 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
                     <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" /><circle cx="12" cy="10" r="2.4" />
@@ -201,13 +209,13 @@ export default function EventsPage() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  {e.quota ? `${e.quota} peserta` : "Tak terbatas"}
+                  {e.peserta_count} / {e.quota || "∞"} terdaftar
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                   </svg>
-                  {e.speaker_name || "-"}
+                  {(e.speaker_name || "-").split(", ").slice(0, 2).join(", ")}{(e.speaker_name || "").split(", ").length > 2 ? ` +${(e.speaker_name || "").split(", ").length - 2}` : ""}
                 </span>
                 <span style={{
                   padding: '2px 7px',
@@ -217,7 +225,7 @@ export default function EventsPage() {
                   fontSize: 10.5,
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
-                  color: '#3C4A42',
+                  color: '#475569',
                 }}>
                   {e.type || "offline"}
                 </span>
@@ -225,7 +233,7 @@ export default function EventsPage() {
 
               {/* Description */}
               {e.description && (
-                <p className="line-clamp-2" style={{ fontSize: 14, color: '#3C4A42', marginBottom: 14 }}>
+                <p className="line-clamp-2" style={{ fontSize: 14, color: '#475569', marginBottom: 14 }}>
                   {e.description}
                 </p>
               )}

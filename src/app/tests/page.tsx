@@ -50,20 +50,20 @@ export default function TestsPage() {
     load();
   }
 
-  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#73837A" }}>Memuat...</div>;
+  if (loading) return <div style={{ padding: 48, textAlign: "center", color: "#64748B" }}>Memuat...</div>;
 
   return (
     <div style={{ animation: "fade-in-up 0.5s ease-out both" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#1F9D5A", marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#2563EB", marginBottom: 4 }}>
             Master
           </div>
           <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em" }}>
             Test & Kuesioner
           </h2>
-          <p style={{ color: "#73837A", fontSize: 13.5, marginTop: 6 }}>Buat template test/kuesioner, lalu binding ke event.</p>
+          <p style={{ color: "#64748B", fontSize: 13.5, marginTop: 6 }}>Buat template test/kuesioner, lalu binding ke event.</p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn btn-primary" style={{ padding: "10px 20px", fontSize: 13.5 }}>
           + Buat Test Baru
@@ -91,13 +91,13 @@ export default function TestsPage() {
               {(["test", "kuesioner"] as const).map(t => (
                 <label key={t} style={{
                   flex: 1, display: "flex", alignItems: "center", gap: 10,
-                  padding: "14px 16px", border: `2px solid ${type === t ? "#2FB36B" : "var(--border)"}`,
+                  padding: "14px 16px", border: `2px solid ${type === t ? "#3B82F6" : "var(--border)"}`,
                   borderRadius: 14, cursor: "pointer", transition: "border 0.15s",
                 }}>
-                  <input type="radio" name="type" checked={type === t} onChange={() => setType(t)} style={{ accentColor: "#0F3D2B" }} />
+                  <input type="radio" name="type" checked={type === t} onChange={() => setType(t)} style={{ accentColor: "#1E3A5F" }} />
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#152019" }}>{t === "test" ? "Test" : "Kuesioner"}</div>
-                    <div style={{ fontSize: 12, color: "#73837A", marginTop: 2 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "#1E293B" }}>{t === "test" ? "Test" : "Kuesioner"}</div>
+                    <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>
                       {t === "test" ? "Pre-Test + Post-Test otomatis" : "Satu kali pengisian, anonim"}
                     </div>
                   </div>
@@ -116,7 +116,7 @@ export default function TestsPage() {
 
       {/* List */}
       {tests.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 60, color: "#73837A", fontSize: 13 }}>
+        <div style={{ textAlign: "center", padding: 60, color: "#64748B", fontSize: 13 }}>
           Belum ada test. Klik "Buat Test Baru" untuk memulai.
         </div>
       ) : (
@@ -136,27 +136,27 @@ export default function TestsPage() {
                     <span style={{
                       fontSize: 10.5, fontWeight: 700, textTransform: "uppercase",
                       padding: "2px 8px", borderRadius: 6,
-                      background: t.type === "test" ? "#DFF5E8" : "#FBEFD6",
-                      color: t.type === "test" ? "#1F9D5A" : "#B57A1E",
+                      background: t.type === "test" ? "#EFF6FF" : "#FBEFD6",
+                      color: t.type === "test" ? "#2563EB" : "#B57A1E",
                     }}>
                       {t.type === "test" ? "Test" : "Kuesioner"}
                     </span>
-                    <span style={{ fontSize: 12, color: "#73837A" }}>
+                    <span style={{ fontSize: 12, color: "#64748B" }}>
                       {(t.test_phases || []).length} phase
                     </span>
-                    <span style={{ fontSize: 12, color: "#73837A" }}>
+                    <span style={{ fontSize: 12, color: "#64748B" }}>
                       • {(t.test_phases || []).reduce((sum: number, p: any) => sum + (p.test_questions?.[0]?.count || 0), 0)} soal
                     </span>
                   </div>
                   <h3 style={{ fontFamily: "var(--font-sora)", fontSize: 16, fontWeight: 700 }}>{t.name}</h3>
-                  {t.description && <p style={{ fontSize: 13, color: "#3C4A42", marginTop: 4 }}>{t.description}</p>}
+                  {t.description && <p style={{ fontSize: 13, color: "#475569", marginTop: 4 }}>{t.description}</p>}
                 </div>
                 <div style={{ display: "flex", gap: 6, flex: "0 0 auto" }}>
                   <button onClick={e => { e.stopPropagation(); push(`/tests/${t.id}`); }}
                     style={{
                       padding: "6px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                       border: "1px solid var(--border)", background: "#fff", cursor: "pointer",
-                      color: "#152019",
+                      color: "#1E293B",
                     }}>
                     Kelola Soal
                   </button>
@@ -179,5 +179,5 @@ export default function TestsPage() {
 
 const inputClass = "w-full bg-white border border-[var(--border)] rounded-[10px] px-3 py-2 text-[14px] text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[rgba(47,179,107,0.35)]";
 function Label({ children }: { children: React.ReactNode }) {
-  return <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#3C4A42", marginBottom: 6, display: "block" }}>{children}</label>;
+  return <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#475569", marginBottom: 6, display: "block" }}>{children}</label>;
 }

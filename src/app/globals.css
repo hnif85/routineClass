@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* ───── Pupuk Kaltim UMKM Connect Design System ───── */
+/* ───── MWX Routine Class Design System — Blue ───── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -37,67 +37,64 @@
 }
 
 :root {
-  /* Pupuk Kaltim Brand */
-  --brand: #0F3D2B;
-  --brand-2: #13513A;
-  --brand-3: #0B2E20;
-  --leaf: #2FB36B;
-  --leaf-strong: #1F9D5A;
-  --leaf-soft: #DFF5E8;
-  --amber: #E2A33A;
-  --amber-soft: #FBEFD6;
+  /* MWX Brand — Blue */
+  --brand: #2563EB;
+  --brand-2: #1D4ED8;
+  --brand-3: #1E3A5F;
+  --accent-brand: #60A5FA;
+  --accent-soft: #EFF6FF;
 
   /* Surface & Canvas */
-  --background: #F5F6F2;
-  --foreground: #152019;
+  --background: #F4F7FC;
+  --foreground: #1E293B;
   --card: #FFFFFF;
-  --card-foreground: #152019;
-  --surface-soft: #F8F9F5;
-  --surface-dark: #0B2E20;
+  --card-foreground: #1E293B;
+  --surface-soft: #F8FAFE;
+  --surface-dark: #1E3A5F;
 
   /* Text */
-  --ink: #152019;
-  --ink-2: #3C4A42;
-  --muted: #73837A;
-  --muted-foreground: #73837A;
+  --ink: #1E293B;
+  --ink-2: #475569;
+  --muted: #94A3B8;
+  --muted-foreground: #94A3B8;
 
   /* Primary */
-  --primary: #0F3D2B;
+  --primary: #2563EB;
   --primary-foreground: #FFFFFF;
-  --primary-active: #13513A;
-  --primary-disabled: #E7EAE2;
+  --primary-active: #1D4ED8;
+  --primary-disabled: #E2E8F0;
 
   /* Secondary */
-  --secondary: #F5F6F2;
-  --secondary-foreground: #152019;
+  --secondary: #F4F7FC;
+  --secondary-foreground: #1E293B;
 
   /* Accent */
-  --accent: #DFF5E8;
-  --accent-foreground: #152019;
+  --accent: #EFF6FF;
+  --accent-foreground: #1E293B;
 
   /* Semantic */
   --destructive: #EF4444;
-  --success: #2FB36B;
-  --warning: #E2A33A;
+  --success: #10B981;
+  --warning: #F59E0B;
 
   /* Borders */
-  --border: #E7EAE2;
-  --border-2: #EFF1EB;
-  --input: #E7EAE2;
-  --ring: rgba(47,179,107,0.35);
+  --border: #E2E8F0;
+  --border-2: #F1F5F9;
+  --input: #E2E8F0;
+  --ring: rgba(37,99,235,0.35);
 
-  /* Sidebar */
-  --sidebar: #0F3D2B;
-  --sidebar-foreground: #C9DDD2;
-  --sidebar-primary: #2FB36B;
+  /* Sidebar — navy */
+  --sidebar: #1E3A5F;
+  --sidebar-foreground: #CBD5E1;
+  --sidebar-primary: #3B82F6;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: rgba(255,255,255,0.10);
+  --sidebar-accent: rgba(59,130,246,0.15);
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgba(255,255,255,0.08);
 
   /* Misc */
-  --shadow: 0 1px 2px rgba(16,42,30,0.04), 0 8px 24px -12px rgba(16,42,30,0.12);
-  --shadow-lg: 0 1px 2px rgba(16,42,30,0.05), 0 20px 48px -20px rgba(16,42,30,0.22);
+  --shadow: 0 1px 2px rgba(30,58,95,0.04), 0 8px 24px -12px rgba(30,58,95,0.12);
+  --shadow-lg: 0 1px 2px rgba(30,58,95,0.05), 0 20px 48px -20px rgba(30,58,95,0.22);
   --radius: 0.625rem;
 }
 
@@ -113,8 +110,8 @@
   html { @apply font-sans; }
 
   ::selection {
-    background: rgba(47,179,107,0.18);
-    color: #152019;
+    background: rgba(37,99,235,0.18);
+    color: #1E293B;
   }
 }
 
@@ -150,7 +147,7 @@
   box-shadow: var(--shadow);
   &:hover {
     transform: translateY(-1px);
-    border-color: #D6DBD0;
+    border-color: #CBD5E1;
   }
 }
 @utility btn-primary {
@@ -159,7 +156,7 @@
   color: #fff;
   &:hover {
     background: var(--brand-2);
-    box-shadow: 0 10px 22px -10px rgba(15,61,43,0.6);
+    box-shadow: 0 10px 22px -10px rgba(37,99,235,0.6);
   }
 }
 @utility btn-ghost {
@@ -193,27 +190,26 @@
 
 /* ───── Progress bar fills ───── */
 .fill-green {
-  background: linear-gradient(90deg, #3BC177, #1F9D5A);
+  background: linear-gradient(90deg, #3B82F6, #2563EB);
 }
 .fill-amber {
   background: linear-gradient(90deg, #EBB857, #D9912B);
 }
 .fill-blue {
-  background: linear-gradient(90deg, #5C8BD6, #3C68B5);
+  background: linear-gradient(90deg, #60A5FA, #3B82F6);
 }
 
-/* ───── Sidebar link hover (client-component-safe) ───── */
+/* ───── Sidebar link hover ───── */
 .sidebar-link-hover:hover {
   background: rgba(255, 255, 255, 0.06) !important;
   color: #fff !important;
 }
 
-/* ───── Responsive: Mobile bottom bar / Desktop sidebar ───── */
+/* ───── Responsive ───── */
 @media (max-width: 768px) {
   .desktop-only { display: none !important; }
   .mobile-bottombar { display: flex !important; }
   .app-layout { grid-template-columns: 1fr !important; }
-  /* Hide topbar on mobile, bottom nav replaces it */
   header { display: none !important; }
 }
 @media (min-width: 769px) {

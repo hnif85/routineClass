@@ -56,9 +56,9 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
   return (
     <div style={{ animation: 'fade-in-up 0.5s ease-out both' }}>
       {/* Back + Header */}
-      <Link href={returnTo || "/umkm"} className="hover:text-[#152019]" style={{
+      <Link href={returnTo || "/umkm"} className="hover:text-[#1E293B]" style={{
         fontSize: 13,
-        color: '#73837A',
+        color: '#64748B',
         fontWeight: 600,
         textDecoration: 'none',
         display: 'inline-flex',
@@ -74,13 +74,13 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
 
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 18, marginBottom: 28 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#1F9D5A', marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#2563EB', marginBottom: 4 }}>
             Detail UMKM
           </div>
           <h2 style={{ fontFamily: 'var(--font-sora)', fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em' }}>
             {u.business_name}
           </h2>
-          <p style={{ color: '#73837A', fontSize: 14, marginTop: 4 }}>
+          <p style={{ color: '#64748B', fontSize: 14, marginTop: 4 }}>
             {u.full_name} • {u.city}
           </p>
         </div>
@@ -89,8 +89,8 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
           borderRadius: 999,
           fontSize: 12,
           fontWeight: 700,
-          background: u.is_active ? '#DFF5E8' : '#F0F2EC',
-          color: u.is_active ? '#1F9D5A' : '#73837A',
+          background: u.is_active ? '#EFF6FF' : '#F0F2EC',
+          color: u.is_active ? '#2563EB' : '#64748B',
         }}>
           {u.is_active ? "Aktif" : "Nonaktif"}
         </span>
@@ -109,20 +109,20 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
             <div style={{
               padding: '14px 20px',
               borderBottom: '1px solid var(--border)',
-              background: '#F8F9F5',
+              background: '#F8FAFE',
             }}>
               <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em' }}>{s.t}</h3>
             </div>
             <div style={{ borderCollapse: 'collapse' }}>
               {s.f.map(([l, v], fi) => (
-                <div key={fi} className="hover:bg-[#F8F9F5]" style={{
+                <div key={fi} className="hover:bg-[#F8FAFE]" style={{
                   display: 'flex',
                   padding: '10px 20px',
                   borderBottom: fi < s.f.length - 1 ? '1px solid var(--border-2)' : 'none',
                   transition: 'background 0.12s',
                 }}>
-                  <span style={{ width: 180, fontSize: 13, color: '#73837A', flexShrink: 0 }}>{l}</span>
-                  <span style={{ fontSize: 14, color: '#152019' }}>
+                  <span style={{ width: 180, fontSize: 13, color: '#64748B', flexShrink: 0 }}>{l}</span>
+                  <span style={{ fontSize: 14, color: '#1E293B' }}>
                     {v || <span style={{ color: '#D1D5DB', fontStyle: 'italic' }}>—</span>}
                   </span>
                 </div>
@@ -142,14 +142,14 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
           <div style={{
             padding: '14px 20px',
             borderBottom: '1px solid var(--border)',
-            background: '#F8F9F5',
+            background: '#F8FAFE',
           }}>
             <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em' }}>Riwayat Event</h3>
           </div>
           {evt && evt.length > 0 ? (
             <div>
               {evt.map((e: any, i: number) => (
-                <div key={i} className="hover:bg-[#F8F9F5]" style={{
+                <div key={i} className="hover:bg-[#F8FAFE]" style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -157,15 +157,15 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
                   borderBottom: i < evt.length - 1 ? '1px solid var(--border-2)' : 'none',
                   transition: 'background 0.12s',
                 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#152019' }}>{e.events?.title}</span>
-                  <span style={{ fontSize: 12.5, color: '#73837A' }}>{e.events?.start_date}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#1E293B' }}>{e.events?.title}</span>
+                  <span style={{ fontSize: 12.5, color: '#64748B' }}>{e.events?.start_date}</span>
                   <span style={{
                     padding: '2px 8px',
                     borderRadius: 999,
                     fontSize: 11,
                     fontWeight: 600,
-                    background: e.status === "attended" || e.status === "rsvp_yes" ? '#DFF5E8' : '#F0F2EC',
-                    color: e.status === "attended" || e.status === "rsvp_yes" ? '#1F9D5A' : '#73837A',
+                    background: e.status === "attended" || e.status === "rsvp_yes" ? '#EFF6FF' : '#F0F2EC',
+                    color: e.status === "attended" || e.status === "rsvp_yes" ? '#2563EB' : '#64748B',
                   }}>
                     {e.status}
                   </span>
@@ -173,7 +173,7 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
               ))}
             </div>
           ) : (
-            <div style={{ padding: 32, textAlign: 'center', fontSize: 13, color: '#73837A' }}>
+            <div style={{ padding: 32, textAlign: 'center', fontSize: 13, color: '#64748B' }}>
               Belum ada riwayat
             </div>
           )}
@@ -190,7 +190,7 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
           <div style={{
             padding: '14px 20px',
             borderBottom: '1px solid var(--border)',
-            background: '#F8F9F5',
+            background: '#F8FAFE',
           }}>
             <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em' }}>Percakapan WhatsApp</h3>
           </div>
@@ -203,33 +203,33 @@ export default async function UmkmDetailPage({ params, searchParams }: { params:
                   fontSize: 13,
                   lineHeight: 1.45,
                   ...(c.direction === "inbound"
-                    ? { background: '#DFF5E8', border: '1px solid #A8DFC1', marginRight: 32 }
-                    : { background: '#F8F9F5', border: '1px solid var(--border)', marginLeft: 32 }),
+                    ? { background: '#EFF6FF', border: '1px solid #A8DFC1', marginRight: 32 }
+                    : { background: '#F8FAFE', border: '1px solid var(--border)', marginLeft: 32 }),
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{
                       fontSize: 10,
                       fontWeight: 700,
                       textTransform: 'uppercase',
-                      color: c.direction === "inbound" ? '#1F9D5A' : '#3C4A42',
+                      color: c.direction === "inbound" ? '#2563EB' : '#475569',
                     }}>
                       {c.direction === "inbound" ? "UMKM" : config.wa_bot_name}
                     </span>
                     {c.intent && (
-                      <span style={{ fontSize: 10, color: '#73837A', padding: '1px 6px', borderRadius: 4, background: '#fff' }}>
+                      <span style={{ fontSize: 10, color: '#64748B', padding: '1px 6px', borderRadius: 4, background: '#fff' }}>
                         {c.intent}
                       </span>
                     )}
-                    <span style={{ fontSize: 10, color: '#73837A', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: 10, color: '#64748B', marginLeft: 'auto' }}>
                       {new Date(c.created_at).toLocaleString("id-ID")}
                     </span>
                   </div>
-                  <p style={{ color: '#152019' }}>{c.content}</p>
+                  <p style={{ color: '#1E293B' }}>{c.content}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ padding: 32, textAlign: 'center', fontSize: 13, color: '#73837A' }}>
+            <div style={{ padding: 32, textAlign: 'center', fontSize: 13, color: '#64748B' }}>
               Belum ada percakapan
             </div>
           )}

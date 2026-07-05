@@ -43,6 +43,11 @@ interface GenerateRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const { checkRateLimit, getClientIp, LIMITS } = await import("@/lib/rate-limit");
+  const ip = getClientIp(req);
+  const rl = checkRateLimit({ ...LIMITS.ai, identifier: `ai:${ip}` });
+  if (!rl.allowed) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+
   try {
     const body: GenerateRequest = await req.json();
     const { topic, days = 1, level = "pemula" } = body;
