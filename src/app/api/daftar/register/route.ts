@@ -10,8 +10,8 @@ function generatePassword(): string {
   return randomBytes(12).toString("base64url"); // ~16 chars random
 }
 
-function hashPassword(password: string, salt: string): string {
-  return pbkdf2Sync(password, salt, 600_000, 64, "sha512").toString("hex");
+function hashPassword(password: string, salt: string, iterations: number = 600_000): string {
+  return pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
 }
 
 async function generateToken(user: any): Promise<[string, string]> {

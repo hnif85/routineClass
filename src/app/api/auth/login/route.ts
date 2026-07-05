@@ -3,14 +3,21 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { SignJWT } from "jose";
 import { pbkdf2Sync, randomBytes } from "crypto";
 
-function hashPassword(password: string, salt: string): string {
-  return pbkdf2Sync(password, salt, 600_000, 64, "sha512").toString("hex");
+function hashPassword(password: string, salt: string, iterations: number = 600_000): string {
+  return pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
 }
 
-function verifyPassword(password: string, hash: string): boolean {
-  const [salt, key] = hash.split(":");
-  if (!salt || !key) return false;
-  return hashPassword(password, salt) === key;
+function verifyPassword(password: string, storedHash: string): { ok: boolean; needsRehash: boolean } {
+  const [salt, key] = storedHash.split(":");
+  if (!salt || !key) return { ok: false, needsRehash: false };
+
+  // Coba 600K dulu (baru)
+  if (hashPassword(password, salt, 600_000) === key) return { ok: true, needsRehash: false };
+
+  // Fallback: coba 10K (lama) → perlu rehash
+  if (hashPassword(password, salt, 10_000) === key) return { ok: true, needsRehash: true };
+
+  return { ok: false, needsRehash: false };
 }
 
 export async function POST(req: NextRequest) {
@@ -35,8 +42,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email atau password salah" }, { status: 401 });
     }
 
-    if (!verifyPassword(password, user.password_hash)) {
+    const result = verifyPassword(password, user.password_hash);
+    if (!result.ok) {
       return NextResponse.json({ error: "Email atau password salah" }, { status: 401 });
+    }
+
+    // Auto-upgrade hash to 600K if still on 10K
+    if (result.needsRehash) {
+      const salt = randomBytes(16).toString("hex");
+      const newHash = `${salt}:${hashPassword(password, salt, 600_000)}`;
+      await supabase.from("users").update({ password_hash: newHash }).eq("id", user.id);
     }
 
     // Update last_login
