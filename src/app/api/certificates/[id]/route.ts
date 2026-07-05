@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { PDFDocument, rgb as pdfRgb, StandardFonts } from "pdf-lib";
 import sharp from "sharp";
 import { jwtVerify } from "jose";
+import { SCHEMA } from "@/lib/supabase/schema";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -88,7 +89,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "routine_class" } });
+    const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
 
     // Cert owner or admin/pemateri only
     const isAdmin = payload.role === "admin" || payload.role === "perusahaan" || payload.role === "pemateri";
