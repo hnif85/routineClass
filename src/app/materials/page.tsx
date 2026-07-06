@@ -678,12 +678,14 @@ export default function MaterialsPage() {
                       )}
                     </div>
                   </div>
-                  {/* PPTX upload result */}
+                  {/* ═══ PPTX LOADING ═══ */}
                   {uploadPptxLoading && (
                     <div style={{ padding: 12, background: '#EFF6FF', borderRadius: 10, fontSize: 13, color: '#2563EB' }}>
                       ⏳ Memproses PPTX... (ekstrak teks + buat materi + generate test)
                     </div>
                   )}
+
+                  {/* ═══ PPTX SUCCESS ═══ */}
                   {uploadPptxResult && (
                     <div style={{ padding: 14, background: '#F0FDF4', borderRadius: 10, border: '1px solid #BBF7D0' }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: '#166534', marginBottom: 8 }}>✅ PPTX Berhasil Diproses!</div>
@@ -711,9 +713,10 @@ export default function MaterialsPage() {
                       </div>
                     </div>
                   )}
-                  {/* Copy-Paste + Generate: hanya tampilkan jika BELUM ada PPTX result */}
+
+                  {/* ═══ COPY-PASTE + GENERATE: hanya tampil jika BELUM ada PPTX result ═══ */}
                   {!uploadPptxResult && (
-                    <>
+                    <div>
                       <div>
                         <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
                           atau Copy-Paste Konten Materi
@@ -732,30 +735,19 @@ export default function MaterialsPage() {
                       <button onClick={analyzeUploadedContent} disabled={uploadGenerating || (!uploadRaw.trim() && !uploadFileName)}
                         className="btn btn-primary" style={{
                           padding: '10px', fontSize: 13.5, fontWeight: 700,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8,
                         }}>
-                        {uploadGenerating ? (
-                      <>
-                        <span style={{
-                          width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)',
-                          borderTopColor: '#fff', borderRadius: '50%',
-                          animation: 'spin 0.6s linear infinite',
-                          display: 'inline-block',
-                        }} />
-                        AI Sedang Menganalisis & Membuat Soal...
-                      </>
-                    ) : "Analisis & Generate Pre/Post Test"}
-                  </button>
-                  <button onClick={() => setMode("choose")}
-                    style={{
-                      padding: '8px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
-                      border: 'none', background: 'none', cursor: 'pointer', color: '#64748B',
-                    }}>
-                    ← Kembali
-                  </button>
-                  </>
-                </div>
-              )}
+                        {uploadGenerating ? "AI Sedang Menganalisis..." : "Analisis & Generate Pre/Post Test"}
+                      </button>
+                      <button onClick={() => setMode("choose")}
+                        style={{
+                          padding: '8px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
+                          border: 'none', background: 'none', cursor: 'pointer', color: '#64748B',
+                        }}>
+                        ← Kembali
+                      </button>
+                    </div>
+                  )}
 
               {/* ── Upload Preview (AI-generated tests) ── */}
               {modalMode === "upload-preview" && uploadResult && (
