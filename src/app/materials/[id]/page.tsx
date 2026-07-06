@@ -125,14 +125,19 @@ export default function MaterialDetailPage() {
     if (!editTitle.trim()) { toast.error("Judul harus diisi"); return; }
     if (!mat) return;
     setSaving(true);
-    const { error } = await s.from("materials").update({
-      title: editTitle,
-      description: editDesc,
-      content: editContent,
-      syllabus: editSyllabus,
-      updated_at: new Date().toISOString(),
-    }).eq("id", mat.id);
-    if (error) { toast.error("Gagal: " + error.message); setSaving(false); return; }
+    const res = await fetch("/api/materials/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: mat.id,
+        title: editTitle,
+        description: editDesc,
+        content: editContent,
+        syllabus: editSyllabus,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) { toast.error(json.error || "Gagal update"); setSaving(false); return; }
     toast.success("Materi diperbarui!");
     setMat((prev: any) => ({ ...prev, title: editTitle, description: editDesc, content: editContent, syllabus: editSyllabus }));
     setEditing(false);
@@ -349,7 +354,13 @@ export default function MaterialDetailPage() {
                   <button onClick={async () => {
                     if (!confirm(`Hapus materi "${mat?.title}"? Tindakan ini tidak bisa dibatalkan.`)) return;
                     try {
-                      await s.from("materials").delete().eq("id", mat?.id);
+                      const res = await fetch("/api/materials/delete", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: mat?.id }),
+                      });
+                      const json = await res.json();
+                      if (!res.ok) throw new Error(json.error || "Gagal menghapus");
                       toast.success("Materi berhasil dihapus");
                       push('/materials');
                     } catch (err: any) {

@@ -53,9 +53,19 @@ export default function MaterialsPage() {
 
   async function deleteMaterial(id: string, title: string) {
     if (!confirm(`Hapus materi "${title}"?`)) return;
-    await s.from("materials").delete().eq("id", id);
-    toast.success("Materi dihapus");
-    loadMaterials();
+    try {
+      const res = await fetch("/api/materials/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Gagal menghapus");
+      toast.success("Materi dihapus");
+      loadMaterials();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
   }
 
   async function generateMaterial() {
@@ -91,8 +101,13 @@ export default function MaterialsPage() {
         is_ai_generated: true,
         test_data: { pre_test: aiResult.pre_test || [], post_test: aiResult.post_test || [] },
       };
-      const { error } = await s.from("materials").insert(payload);
-      if (error) throw error;
+      const resMat = await fetch("/api/materials/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const jsonMat = await resMat.json();
+      if (!resMat.ok) throw new Error(jsonMat.error || "Gagal membuat materi");
       toast.success("Materi berhasil disimpan!");
       setShowModal(false);
       setAiTopic("");
@@ -110,15 +125,20 @@ export default function MaterialsPage() {
     if (!manualTitle.trim()) { toast.error("Judul harus diisi"); return; }
     setSaving(true);
     try {
-      const { error } = await s.from("materials").insert({
-        title: manualTitle,
-        description: manualDesc,
-        content: [],
-        total_days: manualDays,
-        syllabus: [],
-        is_ai_generated: false,
+      const resMat = await fetch("/api/materials/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: manualTitle,
+          description: manualDesc,
+          content: [],
+          total_days: manualDays,
+          syllabus: [],
+          is_ai_generated: false,
+        }),
       });
-      if (error) throw error;
+      const jsonMat = await resMat.json();
+      if (!resMat.ok) throw new Error(jsonMat.error || "Gagal membuat materi");
       toast.success("Materi berhasil disimpan!");
       setShowModal(false);
       setManualTitle("");
@@ -206,8 +226,13 @@ export default function MaterialsPage() {
         is_ai_generated: false,
         test_data: { pre_test: uploadResult.pre_test || [], post_test: uploadResult.post_test || [] },
       };
-      const { error } = await s.from("materials").insert(payload);
-      if (error) throw error;
+      const resMat = await fetch("/api/materials/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const jsonMat = await resMat.json();
+      if (!resMat.ok) throw new Error(jsonMat.error || "Gagal membuat materi");
       toast.success("Materi berhasil disimpan!");
       setShowModal(false);
       resetUploadState();
