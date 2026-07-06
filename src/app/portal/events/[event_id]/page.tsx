@@ -76,6 +76,7 @@ export default function PortalEventDetailPage() {
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [eventApps, setEventApps] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -86,6 +87,12 @@ export default function PortalEventDetailPage() {
           return;
         }
         setUser(d.user);
+
+        // Load profile
+        const { data: p } = await supabase
+          .from("umkm").select("full_name, business_name").eq("id", d.user.umkm_id).maybeSingle();
+        setProfile(p);
+
         await loadData(d.user);
       })
       .catch(() => push("/login"));
@@ -177,6 +184,11 @@ export default function PortalEventDetailPage() {
     setLoading(false);
   }
 
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    push("/login");
+  }
+
   async function handleRsvp(status: "rsvp_yes" | "rsvp_no") {
     if (!invitation) return;
     setRsvpLoading(true);
@@ -218,21 +230,109 @@ export default function PortalEventDetailPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#F8FAFC" }}>
-      {/* ══ HEADER ══ */}
-      <header style={{ background: "#fff", padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid #F1F5F9" }}>
-        <button onClick={() => back()} style={{ border: "1px solid #E2E8F0", background: "#fff", color: "#475569", width: 32, height: 32, borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 16, height: 16 }}>
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", letterSpacing: "0.03em" }}>
-            PORTAL MONITORING UMKM.MWX
+      {/* ══ TOP BAR ══ */}
+      <header
+        style={{
+          background: "#fff",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          borderBottom: "1px solid #F1F5F9",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}
+      >
+        {/* Row 1: brand + profile + logout */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 16px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            <img
+              src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png"
+              alt=""
+              style={{ width: 22, height: 22, borderRadius: 5, flexShrink: 0 }}
+            />
+            <span style={{
+              fontSize: 12, fontWeight: 700, color: "#2563EB", letterSpacing: "0.03em",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              PORTAL UMKM.MWX
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <button
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                border: "1px solid #E2E8F0", background: "#F8FAFC",
+                padding: "5px 10px 5px 5px", borderRadius: 20, cursor: "pointer",
+              }}
+            >
+              <div style={{
+                width: 26, height: 26, borderRadius: "50%",
+                background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+                border: "1.5px solid #BFDBFE",
+                color: "#2563EB", fontSize: 11, fontWeight: 700,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {(user?.name || profile?.full_name || "U").charAt(0).toUpperCase()}
+              </div>
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: "#1E293B",
+                maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {profile?.full_name || user?.name || "UMKM"}
+              </span>
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                border: "1px solid #FEE2E2", background: "#FEF2F2",
+                color: "#DC2626", padding: "6px 10px", borderRadius: 8,
+                fontSize: 11, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
           </div>
         </div>
-        <a href="/portal" style={{ border: "1px solid #E2E8F0", background: "#fff", color: "#475569", padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
-          Portal
-        </a>
+
+        {/* Row 2: back + breadcrumb */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 16px",
+            borderTop: "1px solid #F1F5F9",
+            background: "#FAFBFC",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600 }}>
+            <button
+              onClick={() => back()}
+              style={{
+                border: "none", background: "none", color: "#2563EB",
+                padding: 0, cursor: "pointer", display: "flex", alignItems: "center",
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 14, height: 14 }}>
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <a href="/portal" style={{ color: "#2563EB", textDecoration: "none" }}>Portal</a>
+            <span style={{ color: "#CBD5E1" }}>/</span>
+            <span style={{
+              color: "#64748B",
+              maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {event?.title || "Detail Event"}
+            </span>
+          </div>
+        </div>
       </header>
 
       <main style={{ maxWidth: 640, margin: "0 auto", padding: "24px 16px 80px" }}>

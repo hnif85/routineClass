@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 import { SCHEMA } from "@/lib/supabase/schema";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 async function verifyAdmin(req: NextRequest) {
   const token = req.cookies.get("session")?.value;
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+  const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
   const { data, error } = await s.from("certificate_templates").select("*").eq("id", id).single();
   if (error) return NextResponse.json({ error: "Template tidak ditemukan" }, { status: 404 });
   return NextResponse.json({ data });
@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const body = await req.json();
-  const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+  const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
 
   const updates: Record<string, any> = { updated_at: new Date().toISOString() };
   if (body.name !== undefined) updates.name = body.name;
@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+  const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
   const { error } = await s.from("certificate_templates").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

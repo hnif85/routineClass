@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SCHEMA } from "@/lib/supabase/schema";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errors.join("; ") }, { status: 400 });
     }
 
-    const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+    const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
 
     // ── Check duplicate WhatsApp ──
     const { data: existing } = await s

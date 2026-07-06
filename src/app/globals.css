@@ -210,7 +210,7 @@
   .desktop-only { display: none !important; }
   .mobile-bottombar { display: flex !important; }
   .app-layout { grid-template-columns: 1fr !important; }
-  header { display: none !important; }
+  .app-layout header { display: none !important; }
 }
 @media (min-width: 769px) {
   .mobile-bottombar { display: none !important; }

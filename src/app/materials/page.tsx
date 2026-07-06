@@ -749,6 +749,9 @@ export default function MaterialsPage() {
                     </div>
                   )}
 
+                </div>
+              )}
+
               {/* ── Upload Preview (AI-generated tests) ── */}
               {modalMode === "upload-preview" && uploadResult && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

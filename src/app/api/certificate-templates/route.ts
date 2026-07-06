@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 import { SCHEMA } from "@/lib/supabase/schema";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 async function verifyAdmin(req: NextRequest) {
   const token = req.cookies.get("session")?.value;
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const user = await verifyAdmin(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+  const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
   const { data, error } = await s.from("certificate_templates").select("*").order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const { name, description, config } = body;
   if (!name?.trim()) return NextResponse.json({ error: "Nama template harus diisi" }, { status: 400 });
 
-  const s = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: SCHEMA } });
+  const s = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
   const { data, error } = await s.from("certificate_templates").insert({
     name: name.trim(),
     description: description || "",

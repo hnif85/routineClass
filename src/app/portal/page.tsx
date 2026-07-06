@@ -279,67 +279,110 @@ export default function PortalPage() {
   /* ─── Render ─── */
   return (
     <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "var(--font-sora), system-ui, sans-serif" }}>
-      {/* ═══ HEADER ═══ */}
+      {/* ═══ TOP BAR ═══ */}
       <header
         style={{
           background: "#fff",
-          padding: "14px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
           position: "sticky",
           top: 0,
           zIndex: 100,
           borderBottom: "1px solid #F1F5F9",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <img
-            src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png"
-            alt=""
-            style={{ width: 24, height: 24, borderRadius: 5 }}
-          />
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#2563EB", letterSpacing: "0.03em" }}>
-            PORTAL MONITORING UMKM.MWX
-          </span>
+        {/* Row 1: brand + profile + logout */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 16px",
+          }}
+        >
+          {/* Left: logo + brand */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            <img
+              src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png"
+              alt=""
+              style={{ width: 22, height: 22, borderRadius: 5, flexShrink: 0 }}
+            />
+            <span style={{
+              fontSize: 12, fontWeight: 700, color: "#2563EB", letterSpacing: "0.03em",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              PORTAL UMKM.MWX
+            </span>
+          </div>
+
+          {/* Right: profile + logout */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <button
+              onClick={() => setShowProfile(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                border: "1px solid #E2E8F0", background: "#F8FAFC",
+                padding: "5px 10px 5px 5px", borderRadius: 20,
+                cursor: "pointer",
+              }}
+            >
+              <div style={{
+                width: 26, height: 26, borderRadius: "50%",
+                background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+                border: "1.5px solid #BFDBFE",
+                color: "#2563EB", fontSize: 11, fontWeight: 700,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {(user?.name || profile?.full_name || "U").charAt(0).toUpperCase()}
+              </div>
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: "#1E293B",
+                maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {profile?.full_name || user?.name || "UMKM"}
+              </span>
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                border: "1px solid #FEE2E2", background: "#FEF2F2",
+                color: "#DC2626", padding: "6px 10px", borderRadius: 8,
+                fontSize: 11, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <a
-            href="/portal/history"
-            style={{
-              border: "1px solid #E2E8F0",
-              background: "#fff",
-              color: "#64748B",
-              padding: "6px 10px",
-              borderRadius: 8,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: "pointer",
-              textDecoration: "none",
-            }}
-          >
-            Riwayat
-          </a>
-          <button
-            onClick={() => setShowProfile(true)}
-            title="Profil & Logout"
-            style={{
-              border: "2px solid #E2E8F0",
-              background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
-              width: 34,
-              height: 34,
-              borderRadius: "50%",
-              color: "#2563EB",
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {(user?.name || profile?.full_name || "U").charAt(0).toUpperCase()}
-          </button>
+
+        {/* Row 2: breadcrumb + navigation */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 16px",
+            borderTop: "1px solid #F1F5F9",
+            background: "#FAFBFC",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600 }}>
+            <a href="/portal" style={{ color: "#2563EB", textDecoration: "none" }}>Portal</a>
+            <span style={{ color: "#CBD5E1" }}>/</span>
+            <span style={{ color: "#64748B" }}>Beranda</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <a
+              href="/portal/history"
+              style={{
+                border: "1px solid #E2E8F0", background: "#fff",
+                color: "#64748B", padding: "5px 10px", borderRadius: 6,
+                fontSize: 11, fontWeight: 600, textDecoration: "none",
+                display: "flex", alignItems: "center", gap: 4,
+              }}
+            >
+              📋 Riwayat
+            </a>
+          </div>
         </div>
       </header>
 
