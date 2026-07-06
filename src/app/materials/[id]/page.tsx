@@ -346,6 +346,32 @@ export default function MaterialDetailPage() {
                   </a>
                 )}
                 {!editing && (
+                  <button onClick={async () => {
+                    if (!confirm(`Hapus materi "${mat?.title}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+                    try {
+                      await s.from("materials").delete().eq("id", mat?.id);
+                      toast.success("Materi berhasil dihapus");
+                      push('/materials');
+                    } catch (err: any) {
+                      toast.error("Gagal menghapus: " + err.message);
+                    }
+                  }}
+                    title="Hapus materi"
+                    style={{
+                      padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                      border: '1px solid #FCA5A5', background: '#fff', cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#DC2626',
+                    }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    Hapus
+                  </button>
+                )}
+                {!editing && (
                   <button onClick={exportPptx} disabled={exporting}
                     title="Simpan sebagai PPTX"
                     style={{
