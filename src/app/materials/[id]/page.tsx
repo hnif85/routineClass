@@ -547,14 +547,27 @@ export default function MaterialDetailPage() {
                 <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
                 {editContent.map((c: any, i: number) => (
                   <details key={i} style={{ marginBottom: 8 }} open={true}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 13, padding: '6px 0' }}>
-                      Hari {c.day}: <input value={c.title || ""}
+                    <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 13, padding: '6px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>Hari {c.day}:</span>
+                      <input value={c.title || ""}
                         onChange={e => updateContentDay(i, "title", e.target.value)}
                         style={{
                           padding: '4px 8px', borderRadius: 6, fontSize: 13,
-                          border: '1px solid var(--border)', outline: 'none', width: '60%',
+                          border: '1px solid var(--border)', outline: 'none', width: '50%',
                         }}
                       />
+                      <button onClick={(e) => { e.preventDefault(); if (confirm(`Hapus sesi "${c.title || `Hari ${c.day}`}"?`)) removeContentDay(i); }}
+                        style={{
+                          marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer',
+                          color: '#DC2626', fontSize: 11, fontWeight: 600, padding: '2px 6px',
+                          borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 3,
+                        }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}>
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        Hapus
+                      </button>
                     </summary>
                     <div style={{
                       padding: '10px 12px', marginTop: 6,
