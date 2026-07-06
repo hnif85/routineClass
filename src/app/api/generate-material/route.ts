@@ -57,37 +57,43 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Step 1: Generate material content ──
-    const materialPrompt = `Anda adalah asisten pembuat materi pelatihan UMKM di Indonesia. 
-Buatlah materi pelatihan yang lengkap, praktis, dan mudah dipahami oleh pelaku UMKM.
+    const materialPrompt = `Anda adalah asisten pembuat materi pelatihan UMKM Indonesia yang sangat ketat terhadap akurasi data. Tugas Anda adalah membuat HANDBOOK LENGKAP untuk peserta pelatihan — bukan sekadar outline.
 
 Topik: "${topic}"
 Tingkat: ${level}
 Jumlah hari pelatihan: ${days}
 
-Format output JSON (jangan pakai markdown, langsung JSON):
+INSTRUKSI KETAT:
+1. LAKUKAN RISET internal Anda untuk setiap fakta/angka/statistik yang disebutkan. Gunakan data yang benar, akurat, dan terkini (tahun 2024-2026). JANGAN membuat data palsu.
+2. Jika tidak yakin dengan suatu data, jangan menyebutkan angka spesifik — gunakan pernyataan kualitatif seperti "banyak UMKM mengalami..."
+3. Setiap sesi harus berisi: penjelasan konsep, data/statistik relevan (hanya jika yakin), contoh nyata/kontekstual Indonesia, langkah praktis yang bisa dilakukan peserta, dan kesimpulan.
+4. Minimal 800 kata per sesi (bukan 500). Handbook harus benar-benar lengkap dan siap cetak.
+5. Bahasa Indonesia formal namun mudah dipahami pelaku UMKM.
+6. Contoh dan studi kasus harus kontekstual Indonesia (UKM batik, kuliner, fashion, agribisnis, dll).
+
+Format output JSON WAJIB (HANYA JSON, tanpa markdown, tanpa penjelasan lain):
 {
-  "title": "Judul materi yang menarik",
-  "description": "Deskripsi singkat materi (2-3 kalimat)",
+  "title": "Judul materi yang profesional dan menarik",
+  "description": "Deskripsi singkat materi (2-3 kalimat) yang menjelaskan apa yang akan dipelajari peserta",
   "syllabus": [
-    { "day": 1, "topic": "Judul sesi hari 1", "duration": "durasi dalam jam" }
+    { "day": 1, "topic": "Judul sesi hari 1", "duration": "durasi dalam jam (misal: 2 jam)" }
   ],
   "content": [
     {
       "day": 1,
       "title": "Judul sesi hari 1",
-      "body": "Penjelasan lengkap dalam paragraf, dengan poin-poin penting, contoh praktis untuk UMKM Indonesia, dan tips aplikasi. Tulis dalam Bahasa Indonesia yang baik dan benar. Minimal 500 kata per hari."
+      "body": "Handbook lengkap untuk sesi ini. Minimal 800 kata. Gunakan format: ## Sub-Judul untuk setiap bagian. Sertakan bullet points untuk poin penting. Akhiri dengan ## Rangkuman dan ## Tugas Praktis."
     }
   ]
 }
 
-Pastikan:
+PASTIKAN:
+- Setiap data/statistik yang disebutkan adalah HASIL RISET, bukan karangan
+- Jumlah sesi = ${days} hari (jika days=1, hanya 1 sesi)
 - Materi relevan dengan konteks UMKM Indonesia
-- Bahasa Indonesia yang jelas dan praktis
-- Ada contoh nyata yang relevan
-- Setiap hari memiliki sub-topik yang terstruktur
-- Total hari sesuai dengan jumlah yang diminta`;
+- Siap digunakan sebagai bahan ajar cetak/digital`;
 
-    let materialRaw = await callDeepSeek("Anda adalah ahli pembuatan materi pelatihan UMKM.", materialPrompt);
+    let materialRaw = await callDeepSeek("Anda adalah ahli pembuatan materi pelatihan UMKM Indonesia yang mengutamakan akurasi data dan riset.", materialPrompt);
 
     // Mock fallback if no API key
     if (!materialRaw) {
@@ -99,24 +105,26 @@ Pastikan:
     const material = JSON.parse(cleaned);
 
     // ── Step 2: Generate pre/post test questions ──
-    const testPrompt = `Berdasarkan materi pelatihan berikut, buatlah soal pre-test dan post-test.
+    const testPrompt = `Berdasarkan materi pelatihan "${topic}" tingkat ${level} berikut, buatlah soal pre-test dan post-test.
 
-Topik: "${topic}"
-Tingkat: ${level}
+INSTRUKSI KETAT:
+1. Pre-test: 5 soal pilihan ganda yang mengukur PENGETAHUAN DASAR sebelum pelatihan (pertanyaan umum seputar topik).
+2. Post-test: 5 soal pilihan ganda yang mengukur PEMAHAMAN SETELAH BELAJAR (pertanyaan spesifik dari isi materi).
+3. Setiap soal memiliki 4 opsi jawaban (A, B, C, D) dan SATU jawaban benar.
+4. Soal harus SPESIFIK dan detail, bukan pertanyaan umum/cliche.
+5. Jawaban yang benar harus tidak bisa ditebak dari opsi lain.
 
-Buat 5 soal pilihan ganda untuk PRE-TEST (sebelum materi) dan 5 soal pilihan ganda untuk POST-TEST (setelah materi).
-Setiap soal memiliki 4 opsi jawaban (A, B, C, D) dan satu jawaban benar.
-
-Format JSON:
+Format JSON WAJIB (HANYA JSON, tanpa teks lain):
 {
   "pre_test": [
-    { "question": "Teks soal?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 0, "points": 1 }
+    { "question": "Teks pertanyaan spesifik?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 0, "points": 1 }
   ],
-  "post_test": [ ... ]
+  "post_test": [
+    { "question": "Teks pertanyaan spesifik?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 2, "points": 2 }
+  ]
 }
 
-Jawaban pre-test mengukur pengetahuan dasar, jawaban post-test mengukur pemahaman setelah belajar.
-Gunakan nomor index (0-based) untuk correct.`;
+Gunakan nomor index (0-based) untuk correct. Pre-test points=1, Post-test points=2.`;
 
     let testRaw = await callDeepSeek("Anda adalah ahli pembuat soal pelatihan.", testPrompt);
 
