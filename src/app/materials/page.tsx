@@ -692,7 +692,7 @@ export default function MaterialsPage() {
                         📊 {uploadPptxResult.material.slides} slide → {uploadPptxResult.material.slides} sesi<br />
                         {uploadPptxResult.test ? `📝 Pre & Post Test siap` : `⚠️ Test tidak dapat digenerate`}
                       </div>
-                      <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+                      <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                         <a href={`/materials/${uploadPptxResult.material.id}`} target="_blank"
                           style={{ padding: '6px 12px', background: '#166534', color: '#fff', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
                           📖 Lihat Materi
@@ -703,30 +703,38 @@ export default function MaterialsPage() {
                             📝 Lihat Test
                           </a>
                         )}
+                        <button onClick={() => { setShowModal(false); resetUploadState(); loadMaterials(); }}
+                          style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                            border: '1px solid var(--border)', background: '#fff', cursor: 'pointer', color: '#1E293B' }}>
+                          ✓ Selesai
+                        </button>
                       </div>
                     </div>
                   )}
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
-                      atau Copy-Paste Konten Materi
-                    </label>
-                    <textarea value={uploadRaw} onChange={e => setUploadRaw(e.target.value)}
-                      placeholder="Tempel konten materi Anda di sini..."
-                      rows={8}
-                      style={{
-                        width: '100%', padding: '10px 14px', borderRadius: 10,
-                        border: '1px solid var(--border)', fontSize: 13, outline: 'none',
-                        boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit',
-                        lineHeight: 1.6,
-                      }}
-                    />
-                  </div>
-                  <button onClick={analyzeUploadedContent} disabled={uploadGenerating || (!uploadRaw.trim() && !uploadFileName)}
-                    className="btn btn-primary" style={{
-                      padding: '10px', fontSize: 13.5, fontWeight: 700,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4,
-                    }}>
-                    {uploadGenerating ? (
+                  {/* Copy-Paste + Generate: hanya tampilkan jika BELUM ada PPTX result */}
+                  {!uploadPptxResult && (
+                    <>
+                      <div>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
+                          atau Copy-Paste Konten Materi
+                        </label>
+                        <textarea value={uploadRaw} onChange={e => setUploadRaw(e.target.value)}
+                          placeholder="Tempel konten materi Anda di sini..."
+                          rows={8}
+                          style={{
+                            width: '100%', padding: '10px 14px', borderRadius: 10,
+                            border: '1px solid var(--border)', fontSize: 13, outline: 'none',
+                            boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit',
+                            lineHeight: 1.6,
+                          }}
+                        />
+                      </div>
+                      <button onClick={analyzeUploadedContent} disabled={uploadGenerating || (!uploadRaw.trim() && !uploadFileName)}
+                        className="btn btn-primary" style={{
+                          padding: '10px', fontSize: 13.5, fontWeight: 700,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 4,
+                        }}>
+                        {uploadGenerating ? (
                       <>
                         <span style={{
                           width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)',
@@ -745,6 +753,7 @@ export default function MaterialsPage() {
                     }}>
                     ← Kembali
                   </button>
+                  </>
                 </div>
               )}
 
