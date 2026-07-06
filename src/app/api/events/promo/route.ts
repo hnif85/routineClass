@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const token = req.cookies.get("session")?.value;
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+    const role = (payload as any).role as string;
+    if (!["admin", "super_admin", "perusahaan", "pemateri"].includes(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { eventId } = await req.json();
     if (!eventId) return NextResponse.json({ error: "eventId required" }, { status: 400 });
 
@@ -11,6 +21,7 @@ export async function POST(req: NextRequest) {
     if (!ev) return NextResponse.json({ error: "Event not found" }, { status: 404 });
 
     const title = ev.title || "";
+    const titleLower = title.toLowerCase();
     const date = ev.start_date ? new Date(ev.start_date).toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : "[TANGGAL]";
     const location = ev.location || "Online";
     const venueType = (ev.location || "").toLowerCase().includes("smesco") ? "SMESCO" : (ev.location || "").toLowerCase().includes("kantor") ? "Kantor MWX" : "Online";
@@ -20,9 +31,78 @@ export async function POST(req: NextRequest) {
     const time = ev.start_time ? `${ev.start_time?.substring(0, 5)} - ${ev.end_time?.substring(0, 5) || "selesai"} WIB` : "[JAM]";
     const quota = ev.quota || 30;
     const speaker = ev.speaker_name || "Tim MWX";
-    const slug = ev.title?.toLowerCase().replace(/[^a-z0-9]+/g, "-").substring(0, 30) || "event";
     const onlineType = ev.type === "online";
     const daftarLink = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/daftar/${ev.id}`;
+
+    // ── Fetch event apps for contextual KV ──
+    const { data: eventAppsRel } = await supabase
+      .from("event_apps")
+      .select("app:master_apps(name, color)")
+      .eq("event_id", eventId);
+    const eventApps = (eventAppsRel || []).map((ea: any) => ea.app).filter(Boolean);
+    const appNames = eventApps.map((a: any) => a.name.toLowerCase());
+
+    // ── Determine hero visual based on apps + title ──
+    function nameMatch(...keywords: string[]) {
+      return keywords.some(k => appNames.some(n => n.includes(k)));
+    }
+
+    const hero = (() => {
+      if (nameMatch("desain","canva","grafis","edit","visual","foto","gambar","ilustrasi","poster") ||
+          titleLower.includes("desain") || titleLower.includes("canva") || titleLower.includes("grafis") || titleLower.includes("edit") || titleLower.includes("kreatif")) {
+        return {
+          center: "3D realistic laptop mockup open showing a professional design/canvas interface with colorful elements, layers palette, and creative project, laptop slightly angled with warm orange/blue glow",
+          icons: "paint palette, typography tool, image/photo icon, layout grid, color wheel, brush tool, Instagram/Canva logo, download/export icon, star sparkle",
+          benefits: '"Komunikasi Lebih Efektif", "Branding Profesional", "Konten Menarik", "Bisnis Naik Kelas"',
+        };
+      }
+      if (nameMatch("buku","keuangan","akuntansi","pajak","bank","invoice","kredit","neraca","laporan") ||
+          titleLower.includes("keuangan") || titleLower.includes("buku") || titleLower.includes("akuntansi") || titleLower.includes("pajak")) {
+        return {
+          center: "3D realistic tablet mockup showing a professional financial dashboard with revenue graphs, expense pie chart, invoice list, and green upward arrows, tablet slightly tilted with soft gold/blue glow",
+          icons: "money bag, gold coin stack, bar chart rising, calculator, bank building, invoice document, pie chart, percentage tag, wallet",
+          benefits: '"Keuangan Lebih Tertata", "Laporan Otomatis", "Pajak Terkelola", "Bisnis Berkembang"',
+        };
+      }
+      if (nameMatch("toko","jual","shop","ecommerce","marketplace","belanja","order","katalog","produk") ||
+          titleLower.includes("jual") || titleLower.includes("toko") || titleLower.includes("ecommerce") || titleLower.includes("marketplace") || titleLower.includes("dagang")) {
+        return {
+          center: "3D realistic smartphone mockup showing an e-commerce dashboard with product catalog, sales analytics, order notifications, and revenue numbers, phone slightly tilted with glowing edges",
+          icons: "shopping bag, delivery truck, product box, star rating 5 stars, shopping cart, payment terminal, discount tag, bar chart, Instagram logo",
+          benefits: '"Penjualan Meningkat", "Produk Terekspos", "Pelanggan Setia", "Bisnis Naik Kelas"',
+        };
+      }
+      if (nameMatch("sosial","media","ig","tiktok","facebook","instagram","whatsapp","marketing","promosi","konten","seo") ||
+          titleLower.includes("sosial media") || titleLower.includes("marketing") || titleLower.includes("promosi") || titleLower.includes("konten")) {
+        return {
+          center: "3D realistic smartphone mockup showing a social media analytics dashboard with engagement metrics, follower growth chart, content calendar, and post previews, phone slightly tilted with vibrant pink/blue glow",
+          icons: "Instagram logo, TikTok logo, WhatsApp logo, heart/like icon, comment bubble, share arrow, camera lens, trending graph, megaphone",
+          benefits: '"Brand Makin Dikenal", "Konten Menarik", "Engagement Meningkat", "Bisnis Naik Kelas"',
+        };
+      }
+      if (nameMatch("ai","cerdas","otomatis","teknologi","digital","robot","machine","data","analitik","software","saas","cloud") ||
+          titleLower.includes("ai") || titleLower.includes("digital") || titleLower.includes("otomatis") || titleLower.includes("teknologi")) {
+        return {
+          center: "3D realistic holographic AI brain or neural network visualization with glowing blue/purple nodes and connection lines, floating in center with futuristic tech rings orbiting, cyberpunk aesthetic",
+          icons: "robot head, gear/cog, cloud upload, automation flow chart, sparkle/star, data server nodes, checkmark shield, circuit board",
+          benefits: '"Otomatisasi Cerdas", "Produktivitas Meningkat", "Digital Siap", "Bisnis Modern"',
+        };
+      }
+      if (nameMatch("zoom","meet","online","video","stream","webinar","kelas","training","pelatihan","kursus") ||
+          titleLower.includes("produktif") || titleLower.includes("efisien") || titleLower.includes("manajemen") || titleLower.includes("operasi") || titleLower.includes("tim") || titleLower.includes("kerja")) {
+        return {
+          center: "3D realistic laptop mockup showing a sleek project management dashboard with kanban board, calendar, task lists, team avatars, and progress charts, laptop slightly angled with soft blue glow",
+          icons: "checkmark list, calendar, clock, team/people icon, graph upward, document, chat bubble, target/bullseye, video play button",
+          benefits: '"Kerja Lebih Efisien", "Tim Terkoordinasi", "Target Tercapai", "Bisnis Naik Kelas"',
+        };
+      }
+      // Default
+      return {
+        center: "3D realistic smartphone mockup showing a sleek analytics dashboard with colorful charts, numbers, and business metrics, phone slightly tilted/perspective view with glowing edges",
+        icons: "Instagram logo, WhatsApp logo, bar chart, line graph with upward arrow, shopping bag, money bag, lock/security icon, pie chart, star rating icon, calendar",
+        benefits: '"Komunikasi Lebih Efektif", "Leadership & Mindset", "Produktivitas Meningkat", "Bisnis Berkembang"',
+      };
+    })();
 
     // ── 1. KV Prompt ──
     const kvPrompt = `Create a professional Indonesian UMKM workshop event poster (Kartu Undangan / KV) in modern 3D corporate tech style.
@@ -36,8 +116,8 @@ LAYOUT (top to bottom):
 3. MAIN TITLE — Very large, bold, white sans-serif text: "${title}"
    Below title in lighter blue/cyan (#60A5FA): "${onlineType ? "Online via Zoom" : venueType} — ${date.split(",")[0] || date}"
 4. DESCRIPTION — Small paragraph text in soft gray (#94A3B8), 2-3 lines, describing the event benefits for UMKM.
-5. CENTER — 3D realistic smartphone mockup showing a dashboard/analytics screen with charts, numbers, and business metrics. The phone should be slightly tilted/perspective view, glowing edges.
-6. AROUND THE PHONE — Floating 3D colorful icons: Instagram logo, WhatsApp logo, bar chart, line graph with upward arrow, shopping bag, money bag, lock/security icon, pie chart. Each icon should be glossy, 3D rendered, scattered dynamically around the phone with soft glow and depth.
+5. CENTER — ${hero.center}
+6. AROUND THE CENTER OBJECT — Floating 3D colorful icons: ${hero.icons}. Each icon should be glossy, 3D rendered, scattered dynamically around the center object with soft glow and depth.
 7. LEFT SIDE INFO CARDS — Stacked vertically with small icons:
    📍 ${location}
    📅 ${date}
@@ -45,7 +125,7 @@ LAYOUT (top to bottom):
    👥 ${priceText}${isPaid ? ` (${quota} orang)` : ""}
    Each card: small rounded pill with icon + text in white.
 8. CTA BUTTON — Large rounded blue button (#2563EB) at bottom center with white bold text: "${isPaid ? "Rp" + price.toLocaleString("id-ID") + " — Daftar Sekarang" : "GRATIS — Daftar Sekarang"}" with a small arrow icon.
-9. BOTTOM BAR — Thin horizontal strip at very bottom with 4 small benefit icons in a row: "Komunikasi Lebih Efektif", "Leadership & Mindset", "Produktivitas Meningkat", "Bisnis Berkembang" — each with a small icon above and text below, in soft blue tones.
+9. BOTTOM BAR — Thin horizontal strip at very bottom with 4 small benefit icons in a row: ${hero.benefits} — each with a small icon above and text below, in soft blue tones.
 
 STYLE REQUIREMENTS:
 - Ultra-modern, premium corporate tech aesthetic like a SaaS product launch

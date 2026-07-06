@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { deleteTest } from "./actions";
 
 export default function TestsPage() {
   const { push } = useRouter();
@@ -43,10 +44,15 @@ export default function TestsPage() {
     load();
   }
 
-  async function deleteTest(id: string, name: string) {
+  async function handleDeleteTest(id: string, name: string) {
     if (!confirm(`Hapus test "${name}"? Semua soal & jawaban akan ikut terhapus.`)) return;
-    await s.from("tests").delete().eq("id", id);
-    toast.success("Test dihapus");
+    try {
+      const result = await deleteTest(id);
+      if (result.error) throw new Error(result.error);
+      toast.success("Test dihapus");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
     load();
   }
 
@@ -160,7 +166,7 @@ export default function TestsPage() {
                     }}>
                     Kelola Soal
                   </button>
-                  <button onClick={async e => { e.stopPropagation(); await deleteTest(t.id, t.name); }}
+                  <button onClick={async e => { e.stopPropagation(); await handleDeleteTest(t.id, t.name); }}
                     style={{
                       padding: "6px 10px", borderRadius: 10, fontSize: 12, fontWeight: 600,
                       border: "none", background: "#FEE2E2", cursor: "pointer", color: "#991B1B",

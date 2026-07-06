@@ -1,108 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import JSZip from "jszip";
-import { PDFParse } from "pdf-parse";
+import path from "path";
+import url from "url";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { jwtVerify } from "jose";
 
-// ── Extract text from a PPTX buffer ──
-async function extractPptxText(buffer: ArrayBuffer): Promise<{ title: string; slides: { num: number; title: string; body: string }[] }> {
-  const zip = await JSZip.loadAsync(buffer);
-  
-  // Find all slide files
-  const slideFiles = Object.keys(zip.files)
-    .filter(name => name.match(/^ppt\/slides\/slide\d+\.xml$/))
-    .sort((a, b) => {
-      const na = parseInt(a.match(/slide(\d+)/)?.[1] || "0");
-      const nb = parseInt(b.match(/slide(\d+)/)?.[1] || "0");
-      return na - nb;
-    });
+async function extractPdfText(buffer: Buffer): Promise<{ title: string; fullText: string }> {
+  const pdfjsLib = await import(/* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs");
+  const workerPath = path.resolve(process.cwd(), "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = url.pathToFileURL(workerPath).href;
 
-  const slides: { num: number; title: string; body: string }[] = [];
-  let globalTitle = "";
+  const doc = await pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    disableFontFace: true,
+    useSystemFonts: false,
+    enableXfa: false,
+  } as any).promise;
 
-  for (const file of slideFiles) {
-    const xml = await zip.files[file].async("text");
-    const texts: string[] = [];
-    
-    // Extract all <a:t> text elements
-    const tRegex = /<a:t[^>]*>([^<]*)<\/a:t>/g;
-    let match;
-    while ((match = tRegex.exec(xml)) !== null) {
-      const txt = match[1].trim();
-      if (txt) texts.push(txt);
-    }
+  const totalPages = doc.numPages;
+  let pdfTitle = "Materi PDF";
+  const texts: string[] = [];
 
-    const slideNum = parseInt(file.match(/slide(\d+)/)?.[1] || "0");
-    const title = texts[0] || `Slide ${slideNum}`;
-    const body = texts.slice(1).join("\n\n");
-    
-    // Use first slide title as global title if not set
-    if (!globalTitle && slideNum === 1) {
-      globalTitle = title;
-    }
+  try {
+    const metadata = await doc.getMetadata();
+    const info = metadata?.info as Record<string, any> | undefined;
+    if (info?.Title) pdfTitle = info.Title;
+  } catch {}
 
-    if (body.trim()) {
-      slides.push({ num: slideNum, title, body });
-    }
+  for (let i = 1; i <= totalPages; i++) {
+    const page = await doc.getPage(i);
+    const textContent = await page.getTextContent();
+    const text = textContent.items.map((item: any) => item.str || "").join(" ");
+    if (text.trim()) texts.push(text.trim());
   }
 
-  return { title: globalTitle || "Materi Presentasi", slides };
+  await doc.destroy();
+  return { title: pdfTitle, fullText: texts.join("\n\n") };
 }
 
-// ── Extract text from a PDF buffer ──
-async function extractPdfText(buffer: Buffer): Promise<{ title: string; slides: { num: number; title: string; body: string }[] }> {
-  const parser = new PDFParse({ data: new Uint8Array(buffer) });
-  const [info, textResult] = await Promise.all([parser.getInfo(), parser.getText()]);
-  parser.destroy();
-
-  const fullText = textResult.text || "";
-  const lines = fullText.split("\n").map((l: string) => l.trim()).filter((l: string) => l.length > 0);
-
-  // Use per-page text if available, otherwise estimate by ~20-line chunks
-  let slides: { num: number; title: string; body: string }[] = [];
-
-  if (textResult.pages && textResult.pages.length > 0) {
-    slides = textResult.pages.map((p: { num: number; text: string }) => {
-      const pageLines = (p.text || "").split("\n").map((l: string) => l.trim()).filter(Boolean);
-      return {
-        num: p.num,
-        title: pageLines[0] || `Halaman ${p.num}`,
-        body: pageLines.slice(1).join("\n") || p.text || "",
-      };
-    });
-  } else {
-    // Fallback: chunk by ~20 lines
-    const PAGE_LINE_ESTIMATE = 20;
-    const chunks: string[] = [];
-    let currentChunk: string[] = [];
-    for (const line of lines) {
-      currentChunk.push(line);
-      if (currentChunk.length >= PAGE_LINE_ESTIMATE) {
-        chunks.push(currentChunk.join("\n"));
-        currentChunk = [];
-      }
-    }
-    if (currentChunk.length) chunks.push(currentChunk.join("\n"));
-
-    slides = chunks.map((chunk, i) => {
-      const bodyLines = chunk.split("\n").filter(Boolean);
-      return {
-        num: i + 1,
-        title: bodyLines[0] || `Halaman ${i + 1}`,
-        body: bodyLines.slice(1).join("\n") || chunk,
-      };
-    });
-  }
-
-  const pdfTitle = info?.info?.Title || lines[0] || "Materi PDF";
-
-  return {
-    title: pdfTitle,
-    slides: slides.length > 0 ? slides : [{ num: 1, title: lines[0] || "Materi", body: fullText.substring(0, 2000) }],
-  };
-}
-
-// ── Generate tests using DeepSeek ──
-async function generateTests(materialTitle: string, content: string): Promise<{ pre: any[]; post: any[] } | null> {
+async function generateTests(materialTitle: string, content: string) {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return null;
 
@@ -110,7 +47,7 @@ async function generateTests(materialTitle: string, content: string): Promise<{ 
 
 Judul: ${materialTitle}
 Materi:
-${content.substring(0, 4000)}
+${content.substring(0, 5000)}
 
 Format JSON:
 {
@@ -124,106 +61,103 @@ Format JSON:
   ]
 }
 
-Buat 3 soal multiple_choice + 2 essay untuk pre-test, dan 3 multiple_choice + 2 essay untuk post-test.
+Buat 3 multiple_choice + 2 essay untuk pre-test, dan 3 multiple_choice + 2 essay untuk post-test.
 Pertanyaan harus spesifik dari materi, bukan pertanyaan umum.
 HANYA return JSON, tidak ada teks lain.`;
 
-  try {
-    const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 2000,
-        temperature: 0.3,
-      }),
-    });
-    const data = await res.json();
-    const raw = data.choices?.[0]?.message?.content || "";
-    // Extract JSON block
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) return JSON.parse(jsonMatch[0]);
-    return null;
-  } catch (e) {
-    console.error("[generate-tests] DeepSeek error:", e);
+  const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 2000,
+      temperature: 0.3,
+    }),
+    signal: AbortSignal.timeout(30000),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error("[materials/upload] DeepSeek error:", res.status, txt);
     return null;
   }
+
+  const data = await res.json();
+  const raw = data.choices?.[0]?.message?.content || "";
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[0]); } catch { return null; }
+  }
+  return null;
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const token = req.cookies.get("session")?.value;
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+    const role = (payload as any).role as string;
+    if (!["admin", "super_admin", "perusahaan", "pemateri"].includes(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    
     if (!file) return NextResponse.json({ error: "File diperlukan" }, { status: 400 });
-    if (!file.name.match(/\.(pptx?|pdf)$/i)) return NextResponse.json({ error: "Hanya file PPTX atau PDF yang didukung" }, { status: 400 });
+    if (!file.name.match(/\.pdf$/i)) {
+      return NextResponse.json({ error: "Hanya file PDF yang didukung" }, { status: 400 });
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: "File maksimal 50MB" }, { status: 400 });
+    }
 
     const supabase = await createServerSupabase();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const isPdf = file.name.match(/\.pdf$/i);
 
-    // ── 1. Extract text ──
-    let title: string, slides: { num: number; title: string; body: string }[];
+    const result = await extractPdfText(buffer);
 
-    if (isPdf) {
-      const result = await extractPdfText(buffer);
-      title = result.title;
-      slides = result.slides;
-    } else {
-      const result = await extractPptxText(arrayBuffer);
-      title = result.title;
-      slides = result.slides;
-    }
-
-    if (slides.length === 0) {
-      return NextResponse.json({ error: `Tidak ada teks ditemukan di file ${isPdf ? "PDF" : "PPTX"}` }, { status: 400 });
-    }
-
-    const fileTypeLabel = isPdf ? "PDF" : "PPTX";
-    const fileType = isPdf ? "pdf" : "pptx";
-
-    // ── 2. Build material content ──
-    const content = slides.map((s, i) => ({
-      day: i + 1,
-      title: s.title,
-      body: s.body,
-    }));
-
-    const syllabus = slides.map((s, i) => ({
-      day: i + 1,
-      topic: s.title,
-      duration: "45 menit",
-    }));
-
-    // ── 3. Upload original file to Supabase Storage ──
     const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+
     const { error: uploadErr } = await supabase.storage
       .from("umkmConnect")
-      .upload(`materials/${fileName}`, buffer, { contentType: file.type, upsert: true });
+      .upload(`materials/${fileName}`, buffer, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
 
-    const fileUrl = uploadErr 
-      ? null 
-      : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/umkmConnect/materials/${fileName}`;
+    if (uploadErr) {
+      return NextResponse.json({ error: "Gagal upload file: " + uploadErr.message }, { status: 500 });
+    }
 
-    // ── 4. Create material record ──
-    const MAX_CONTENT_LENGTH = 32_000;
-    const contentJsonString = JSON.stringify(content);
-    const trimmedContent = contentJsonString.length > MAX_CONTENT_LENGTH
-      ? JSON.parse(contentJsonString.substring(0, MAX_CONTENT_LENGTH))
-      : content;
+    const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/umkmConnect/materials/${fileName}`;
+
+    const title = result.title !== "Materi PDF" ? result.title : file.name.replace(/\.pdf$/i, "");
+
+    const syllabus = [{
+      day: 1,
+      topic: title,
+      duration: "1 sesi",
+    }];
 
     const { data: material, error: matErr } = await supabase
       .from("materials")
       .insert({
         title,
-        description: `Materi dari ${fileTypeLabel}: ${slides.length} halaman`,
-        content: trimmedContent,
+        description: `File PDF — ${file.name}`,
+        content: [],
         syllabus,
-        is_ai_generated: true,
+        total_days: 1,
+        is_ai_generated: false,
         file_url: fileUrl,
-        file_type: fileType,
+        file_type: "pdf",
       })
       .select()
       .single();
@@ -232,16 +166,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Gagal menyimpan materi: " + matErr?.message }, { status: 500 });
     }
 
-    // ── 5. Generate Pre & Post Test ──
-    const allBody = slides.map(s => s.body).join("\n\n").substring(0, 8000);
-    const testData = await generateTests(title, allBody);
+    const testData = result.fullText ? await generateTests(title, result.fullText) : null;
 
     let testId = null;
     if (testData) {
-      // Create test record
-      const testName = `Test: ${title}`;
       const { data: test } = await supabase.from("tests").insert({
-        name: testName,
+        name: `Test: ${title}`,
         description: `Pre & Post test untuk materi "${title}"`,
         type: "test",
         is_active: true,
@@ -249,17 +179,15 @@ export async function POST(req: NextRequest) {
 
       if (test) {
         testId = test.id;
-        // Create pre phase
+
         const { data: prePhase } = await supabase.from("test_phases").insert({
           test_id: test.id, phase: "pre", label: "Pre-Test", sort_order: 0,
         }).select().single();
 
-        // Create post phase
         const { data: postPhase } = await supabase.from("test_phases").insert({
           test_id: test.id, phase: "post", label: "Post-Test", sort_order: 1,
         }).select().single();
 
-        // Insert questions
         if (prePhase) {
           for (let i = 0; i < testData.pre.length; i++) {
             const q = testData.pre[i];
@@ -291,16 +219,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (testId) {
+      await supabase.from("materials").update({
+        test_data: {
+          pre_test: (testData?.pre || []).map((q: any) => ({
+            question: q.question, type: q.type, options: q.options, answer: q.answer,
+          })),
+          post_test: (testData?.post || []).map((q: any) => ({
+            question: q.question, type: q.type, options: q.options, answer: q.answer,
+          })),
+        },
+      }).eq("id", material.id);
+    }
+
     return NextResponse.json({
       success: true,
-      file_type: fileType,
-      material: { id: material.id, title, slides: slides.length },
+      material: {
+        id: material.id,
+        title,
+        file_url: fileUrl,
+      },
       test: testId ? { id: testId, name: `Test: ${title}` } : null,
-      file_url: fileUrl,
     });
-
   } catch (err: any) {
-    console.error("[upload-file] Error:", err);
-    return NextResponse.json({ error: err.message || "Gagal upload" }, { status: 500 });
+    console.error("[materials/upload] Error:", err);
+    return NextResponse.json({ error: "Terjadi kesalahan" }, { status: 500 });
   }
 }

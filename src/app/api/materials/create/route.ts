@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
-    if (!payload.title) {
+    const token = req.cookies.get("session")?.value;
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+    const role = (payload as any).role as string;
+    if (!["admin", "super_admin", "perusahaan", "pemateri"].includes(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await req.json();
+    if (!body.title) {
       return NextResponse.json({ error: "Title harus diisi" }, { status: 400 });
     }
 
@@ -12,13 +22,13 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase
       .from("materials")
       .insert({
-        title: payload.title,
-        description: payload.description || "",
-        content: payload.content || [],
-        total_days: payload.total_days || 1,
-        syllabus: payload.syllabus || [],
-        is_ai_generated: payload.is_ai_generated || false,
-        test_data: payload.test_data || null,
+        title: body.title,
+        description: body.description || "",
+        content: body.content || [],
+        total_days: body.total_days || 1,
+        syllabus: body.syllabus || [],
+        is_ai_generated: body.is_ai_generated || false,
+        test_data: body.test_data || null,
       })
       .select()
       .single();

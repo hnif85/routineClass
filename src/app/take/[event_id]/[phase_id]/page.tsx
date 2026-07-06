@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { submitTestAnswers } from "../../actions";
 
 type Question = {
   id: string;
@@ -110,7 +111,7 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
         return;
       }
 
-      // 6. Fetch questions
+      // 7. Fetch questions
       const { data: qs } = await s.from("test_questions")
         .select("id, question_text, question_type, options, correct_answer, points, sort_order")
         .eq("phase_id", phase_id)
@@ -118,11 +119,67 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
       setQuestions((qs || []) as Question[]);
       if (!qs || qs.length === 0) { setStep("error"); setErrorMsg("Belum ada soal untuk test ini."); return; }
 
-      // 7. Show email gate
-      setStep("gate");
+      // 8. Try auto-detect session (portal user) vs email gate
+      await autoDetectSession();
     } catch (err: any) {
       setStep("error");
       setErrorMsg(err?.message || "Terjadi kesalahan.");
+    }
+  }
+
+  async function autoDetectSession() {
+    try {
+      const meRes = await fetch("/api/auth/me");
+      const meData = await meRes.json();
+
+      if (!meData.user || !meData.user.umkm_id) {
+        setStep("gate");
+        return;
+      }
+
+      const { email: userEmail, umkm_id } = meData.user;
+
+      const { data: umkm, error: uErr } = await s.from("umkm")
+        .select("id, business_name, full_name")
+        .eq("id", umkm_id)
+        .single();
+
+      if (uErr || !umkm) {
+        setStep("gate");
+        return;
+      }
+
+      const { data: inv } = await s.from("event_invitations")
+        .select("status")
+        .eq("event_id", event_id)
+        .eq("umkm_id", umkm.id)
+        .single();
+
+      if (!inv) {
+        setStep("gate");
+        return;
+      }
+
+      const qIds = questions.map(q => q.id);
+      const { count: existingCount } = await s.from("test_answers")
+        .select("id", { count: "exact", head: true })
+        .in("question_id", qIds)
+        .eq("event_id", event_id)
+        .eq("umkm_id", umkm.id);
+
+      if (existingCount && existingCount > 0) {
+        setAlreadySubmitted(true);
+        setUmkmName(umkm.business_name || umkm.full_name || "");
+        setUmkmId(umkm.id);
+        setStep("submitted");
+        return;
+      }
+
+      setUmkmId(umkm.id);
+      setUmkmName(umkm.business_name || umkm.full_name || "");
+      setStep("quiz");
+    } catch {
+      setStep("gate");
     }
   }
 
@@ -188,31 +245,24 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
     }
 
     try {
-      // Double-check: cek apakah sudah ada jawaban sebelumnya (jaga-jaga)
-      const qIds = questions.map(q => q.id);
-      const { count: existingCount } = await s.from("test_answers")
-        .select("id", { count: "exact", head: true })
-        .in("question_id", qIds)
-        .eq("event_id", event_id)
-        .eq("umkm_id", umkmId);
-      if (existingCount && existingCount > 0) {
-        setErrorMsg("Anda sudah mengirim jawaban untuk test ini. Halaman ini akan di-refresh.");
-        setSubmitting(false);
-        setTimeout(() => window.location.reload(), 2500);
+      const result = await submitTestAnswers(
+        event_id,
+        umkmId!,
+        questions.map(q => ({
+          question_id: q.id,
+          answer_text: answers[q.id],
+        })),
+      );
+
+      if (result.error) {
+        if (result.conflict) {
+          setErrorMsg("Anda sudah mengirim jawaban untuk test ini. Halaman ini akan di-refresh.");
+          setTimeout(() => window.location.reload(), 2500);
+        } else {
+          throw new Error(result.error);
+        }
         return;
       }
-
-      const inserts = questions.map(q => ({
-        question_id: q.id,
-        event_id,
-        umkm_id: umkmId,
-        answer_text: answers[q.id],
-        score: null, // admin grades manually
-        submitted_at: new Date().toISOString(),
-      }));
-
-      const { error } = await s.from("test_answers").insert(inserts);
-      if (error) { throw error; }
 
       setStep("submitted");
     } catch (err: any) {
@@ -447,9 +497,15 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
               Terima kasih, {umkmName}!<br />
               Jawaban Anda untuk <strong>{phase?.label}</strong> sudah tercatat.
             </p>
-            <p style={{ fontSize: 12, color: "#64748B", marginTop: 16 }}>
-              Anda bisa tutup halaman ini.
-            </p>
+            <div style={{ marginTop: 20 }}>
+              <a href={`/portal/events/${event_id}`}
+                style={{
+                  display: "inline-block", padding: "10px 24px", fontSize: 14, fontWeight: 700,
+                  background: "#1E3A5F", color: "#fff", borderRadius: 12, textDecoration: "none",
+                }}>
+                Kembali ke Portal
+              </a>
+            </div>
           </div>
         )}
 
@@ -472,9 +528,15 @@ export default function TakeTestPage({ params }: { params: Promise<{ event_id: s
               Halo, {umkmName}!<br />
               Jawaban Anda untuk <strong>{phase?.label}</strong> sudah tercatat sebelumnya. Tidak bisa mengisi ulang.
             </p>
-            <p style={{ fontSize: 12, color: "#64748B", marginTop: 16 }}>
-              Silakan tutup halaman ini.
-            </p>
+            <div style={{ marginTop: 20 }}>
+              <a href={`/portal/events/${event_id}`}
+                style={{
+                  display: "inline-block", padding: "10px 24px", fontSize: 14, fontWeight: 700,
+                  background: "#1E3A5F", color: "#fff", borderRadius: 12, textDecoration: "none",
+                }}>
+                Kembali ke Portal
+              </a>
+            </div>
           </div>
         )}
       </div>

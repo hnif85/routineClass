@@ -47,6 +47,11 @@ export default function EventDetailPage() {
   const [certificates, setCertificates] = useState<Record<string, any>>({});
   const [generatingCerts, setGeneratingCerts] = useState<Set<string>>(new Set());
 
+  // ── Participant Detail Panel ──
+  const [selectedInv, setSelectedInv] = useState<any>(null);
+  const [participantDetail, setParticipantDetail] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
   // Bound tests + completion
   const [boundTests, setBoundTests] = useState<any[]>([]);
   const [promoData, setPromoData] = useState<any>(null);
@@ -58,9 +63,11 @@ export default function EventDetailPage() {
     try {
       const res = await fetch("/api/events/promo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventId }) });
       const data = await res.json();
-      console.log("[promo] response:", data);
       if (data.error) { toast.error(data.error); setPromoLoading(false); return; }
       setPromoData(data);
+      const { error: saveErr } = await s.from("events").update({ promo_data: data }).eq("id", eventId);
+      if (saveErr) console.warn("[promo] save to db failed (column may not exist):", saveErr.message);
+      else setEv((prev: any) => ({ ...prev, promo_data: data }));
     } catch (e: any) { toast.error("Gagal generate: " + e.message); console.error(e); }
     setPromoLoading(false);
   }
@@ -130,6 +137,24 @@ export default function EventDetailPage() {
     const map: Record<string, any> = {};
     (data || []).forEach(c => { map[c.umkm_id] = c; });
     setCertificates(map);
+  }
+
+  async function openParticipantDetail(invitation: any) {
+    setSelectedInv(invitation);
+    setDetailLoading(true);
+    setParticipantDetail(null);
+    if (!invitation?.umkm_id) { setDetailLoading(false); return; }
+    const { data } = await s.from("umkm")
+      .select("id, business_name, full_name, whatsapp, email, business_category, city, monthly_revenue_estimate, year_established, employee_count, has_nib")
+      .eq("id", invitation.umkm_id)
+      .maybeSingle();
+    setParticipantDetail(data || null);
+    setDetailLoading(false);
+  }
+
+  function closeParticipantDetail() {
+    setSelectedInv(null);
+    setParticipantDetail(null);
   }
 
   async function generateCertificate(umkmId: string) {
@@ -644,7 +669,16 @@ export default function EventDetailPage() {
         <TabButton active={activeTab === "materi"} onClick={() => setActiveTab("materi")}>
           Materi ({eventMaterials.length})
         </TabButton>
-        <TabButton active={activeTab === "promo"} onClick={() => { setActiveTab("promo"); if (!promoData) generatePromo(); }}>
+        <TabButton active={activeTab === "promo"} onClick={() => {
+          setActiveTab("promo");
+          if (!promoData) {
+            if (ev?.promo_data) {
+              setPromoData(ev.promo_data);
+            } else {
+              generatePromo();
+            }
+          }
+        }}>
           🚀 Admin + Promo
         </TabButton>
       </div>
@@ -880,20 +914,12 @@ export default function EventDetailPage() {
                     <div key={i.id} style={{
                       display: 'flex', alignItems: 'center', padding: '10px 20px',
                       borderBottom: idx < inv.length - 1 ? '1px solid var(--border-2)' : 'none',
-                      fontSize: 13, gap: 10,
-                    }} className="hover:bg-[#F8FAFE]">
-                      <span style={{ flex: '2 0 0', fontSize: 13.5 }}>
-                        {i.umkm_id ? (
-                          <Link href={`/umkm/${i.umkm_id}?returnTo=/events/${eventId}`} style={{
-                            fontWeight: 700, color: '#1E293B', textDecoration: 'none',
-                          }} className="hover:underline">
-                            {i.umkm?.business_name || i.business_name || '-'}
-                          </Link>
-                        ) : (
-                          <span style={{ fontWeight: 700, color: '#1E293B' }}>
-                            {i.business_name || i.full_name || '-'}
-                          </span>
-                        )}
+                      fontSize: 13, gap: 10, cursor: i.umkm_id ? 'pointer' : 'default',
+                    }}
+                      onClick={() => i.umkm_id && openParticipantDetail(i)}
+                      className="hover:bg-[#F8FAFE]">
+                      <span style={{ flex: '2 0 0', fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+                        {i.umkm?.business_name || i.business_name || '-'}
                       </span>
                       <span style={{ color: '#475569', width: 120 }}>{i.umkm?.full_name || i.full_name || '-'}</span>
                       <span style={{ color: '#64748B', fontSize: 12, fontFamily: 'monospace', width: 130 }}>
@@ -965,6 +991,162 @@ export default function EventDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ════════════════════════════ Detail Panel: Peserta ════════════════════════════ */}
+      {selectedInv && (
+        <div style={{
+          position: 'fixed', top: 0, right: 0, bottom: 0, width: 440, maxWidth: '95vw',
+          zIndex: 9995, background: '#fff', boxShadow: '-8px 0 30px rgba(0,0,0,0.15)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          animation: 'slide-in-right 0.25s ease-out',
+        }}>
+            {/* Header */}
+            <div style={{
+              padding: '16px 20px', borderBottom: '1px solid var(--border)',
+              background: '#F8FAFE', display: 'flex', alignItems: 'center', gap: 12,
+              flex: '0 0 auto',
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 12, background: '#EFF6FF',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#2563EB', fontWeight: 700, fontSize: 16,
+              }}>
+                {((selectedInv.umkm?.business_name || selectedInv.business_name || '?')[0] || '').toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: '#1E293B', lineHeight: 1.3 }}>
+                  {selectedInv.umkm?.business_name || selectedInv.business_name || '-'}
+                </div>
+                <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>
+                  {selectedInv.umkm?.full_name || selectedInv.full_name || '-'}
+                </div>
+              </div>
+              <button onClick={closeParticipantDetail}
+                style={{
+                  border: 'none', background: 'none', cursor: 'pointer',
+                  fontSize: 20, color: '#64748B', padding: 4,
+                }}>
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+              {detailLoading ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#64748B', fontSize: 13 }}>Memuat detail...</div>
+              ) : participantDetail ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Event Status */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Status Event</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600,
+                        background: (INV_STATUS_STYLES[selectedInv.status] || {}).bg || '#F0F2EC',
+                        color: (INV_STATUS_STYLES[selectedInv.status] || {}).fg || '#64748B',
+                        width: 'fit-content',
+                      }}>{(INV_STATUS_STYLES[selectedInv.status] || {}).label || selectedInv.status}</span>
+                      {selectedInv.rsvp_at && (
+                        <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>RSVP</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{new Date(selectedInv.rsvp_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                      )}
+                      {selectedInv.attended_at && (
+                        <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Hadir</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{new Date(selectedInv.attended_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Kontak */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Kontak</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>WhatsApp</span><span style={{ color: '#1E293B', fontWeight: 600, fontFamily: 'monospace' }}>{participantDetail.whatsapp || '-'}</span></div>
+                      <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Email</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.email || '-'}</span></div>
+                      {participantDetail.city && <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Kota</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.city}</span></div>}
+                    </div>
+                  </div>
+
+                  {/* Bisnis */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Bisnis</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {participantDetail.business_category?.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
+                          {participantDetail.business_category.map((cat: string, i: number) => (
+                            <span key={i} style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, background: '#E7EEFB', color: '#3C68B5' }}>{cat}</span>
+                          ))}
+                        </div>
+                      )}
+                      {participantDetail.monthly_revenue_estimate && <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Omzet/Bulan</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.monthly_revenue_estimate}</span></div>}
+                      {participantDetail.year_established && <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Berdiri</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.year_established}</span></div>}
+                      {participantDetail.employee_count !== null && participantDetail.employee_count !== undefined && <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>Karyawan</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.employee_count} orang</span></div>}
+                      <div style={{ display: 'flex', fontSize: 12, gap: 8 }}><span style={{ color: '#64748B' }}>NIB</span><span style={{ color: '#1E293B', fontWeight: 600 }}>{participantDetail.has_nib ? 'Punya' : 'Belum'}</span></div>
+                    </div>
+                  </div>
+
+                  {/* Skor Test */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Skor Test</div>
+                    {certificates[selectedInv.umkm_id] ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                        <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 10, background: '#E7EEFB' }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: '#3C68B5', marginBottom: 2 }}>PRE</div>
+                          <div style={{ fontWeight: 800, fontSize: 18, color: '#3C68B5' }}>{certificates[selectedInv.umkm_id].pre_score ?? '-'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 10, background: '#FBEFD6' }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: '#B57A1E', marginBottom: 2 }}>POST</div>
+                          <div style={{ fontWeight: 800, fontSize: 18, color: '#B57A1E' }}>{certificates[selectedInv.umkm_id].post_score ?? '-'}</div>
+                        </div>
+                        <div style={{ textAlign: 'center', padding: '8px 4px', borderRadius: 10, background: certificates[selectedInv.umkm_id].delta_score > 0 ? '#EFF6FF' : '#F0F2EC' }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: '#2563EB', marginBottom: 2 }}>Δ</div>
+                          <div style={{ fontWeight: 800, fontSize: 18, color: '#2563EB' }}>{certificates[selectedInv.umkm_id].delta_score != null ? (certificates[selectedInv.umkm_id].delta_score > 0 ? `+${certificates[selectedInv.umkm_id].delta_score}` : certificates[selectedInv.umkm_id].delta_score) : '-'}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: '#64748B' }}>Belum ada skor / sertifikat belum diterbitkan.</div>
+                    )}
+                  </div>
+
+                  {/* Sertifikat */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Sertifikat</div>
+                    {certificates[selectedInv.umkm_id] ? (
+                      <a href={`/api/certificates/${certificates[selectedInv.umkm_id].id}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: '#EFF6FF', color: '#2563EB', textDecoration: 'none' }}>
+                        {certificates[selectedInv.umkm_id].cert_number?.split('/').pop() || 'Lihat Sertifikat'}
+                      </a>
+                    ) : ev?.status === "completed" ? (
+                      <button onClick={() => { closeParticipantDetail(); generateCertificate(selectedInv.umkm_id); }}
+                        style={{ padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, border: '1px dashed #3B82F6', background: 'transparent', color: '#3B82F6', cursor: 'pointer' }}>
+                        + Terbitkan Sertifikat
+                      </button>
+                    ) : (
+                      <div style={{ fontSize: 12, color: '#64748B' }}>Belum tersedia</div>
+                    )}
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Aksi</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <a href={`/umkm/${participantDetail.id}?returnTo=/events/${eventId}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'block', padding: '8px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: '#fff', border: '1px solid var(--border)', color: '#1E293B', textDecoration: 'none', textAlign: 'center' }}>
+                        Lihat Profil UMKM
+                      </a>
+                      {(selectedInv.status === 'saved' || selectedInv.status === 'draft') && (
+                        <button onClick={() => { closeParticipantDetail(); sendInvitation(selectedInv.umkm_id); }}
+                          style={{ padding: '8px 12px', borderRadius: 10, fontSize: 13, fontWeight: 600, border: 'none', background: '#2563EB', color: '#fff', cursor: 'pointer' }}>
+                          Kirim Undangan
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: 40, color: '#64748B', fontSize: 13 }}>Data tidak ditemukan.</div>
+              )}
+            </div>
+          </div>
       )}
 
       {/* ════════════════════════════ TAB: Test ════════════════════════════ */}

@@ -29,8 +29,6 @@ export default function MaterialDetailPage() {
   const [editContent, setEditContent] = useState<any[]>([]);
   const [editSyllabus, setEditSyllabus] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState(false);
-
   useEffect(() => {
     loadAll();
   }, []);
@@ -146,41 +144,6 @@ export default function MaterialDetailPage() {
     loadAll();
   }
 
-  async function exportPptx() {
-    if (!mat) return;
-    setExporting(true);
-    try {
-      const res = await fetch("/api/generate-pptx", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: mat.title,
-          description: mat.description,
-          syllabus: mat.syllabus,
-          content: mat.content,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Gagal export");
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${mat.title}.pptx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success("PPTX berhasil didownload!");
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setExporting(false);
-    }
-  }
-
   // ── Edit helpers ──
   function updateContentDay(idx: number, field: string, val: string) {
     const copy = [...editContent];
@@ -211,84 +174,110 @@ export default function MaterialDetailPage() {
   return (
     <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 100px)', animation: 'fade-in-up 0.5s ease-out both' }}>
       {/* ═══ Left: Daftar Sesi ═══ */}
-      <div style={{
-        width: 280, flex: '0 0 auto',
-        background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        boxShadow: 'var(--shadow)',
-      }}>
         <div style={{
-          padding: '14px 16px', borderBottom: '1px solid var(--border)',
-          background: '#F8FAFE',
+          width: 280, flex: '0 0 auto',
+          background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          boxShadow: 'var(--shadow)',
         }}>
-          <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 12, fontWeight: 700, marginBottom: 2, color: '#64748B' }}>
-            DAFTAR SESI
-          </h3>
-          {mat && (
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, lineHeight: 1.3 }}>
-              {mat.title}
-            </p>
-          )}
-          {mat && mat.description && !editing && (
-            <div>
-              <div onClick={() => setDescOpen(!descOpen)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
-                  fontSize: 10.5, fontWeight: 700, color: '#64748B', marginTop: 10, marginBottom: 4,
-                  textTransform: 'uppercase', letterSpacing: '0.04em',
-                }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  style={{ width: 11, height: 11, transition: 'transform 0.2s', transform: descOpen ? 'rotate(90deg)' : '' }}>
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-                Deskripsi
-              </div>
-              {descOpen && (
-                <p style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5, margin: '0 0 4px 0' }}>
-                  {mat.description}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div style={{ flex: 1, overflow: 'auto', padding: '8px 8px' }}>
-          {!mat ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
-              Pilih materi dari daftar
-            </div>
-          ) : contentDays.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
-              Belum ada sesi
-            </div>
-          ) : (
-            contentDays.map((c: any, i: number) => (
-              <div key={`day-${i}`}
-                onClick={() => selectSession(i)}
-                style={{
-                  padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
-                  marginBottom: 3, transition: 'all 0.12s',
-                  background: selectedIdx === i ? '#EFF6FF' : 'transparent',
-                  border: selectedIdx === i ? '1px solid #A8DFC1' : '1px solid transparent',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{
-                    width: 22, height: 22, borderRadius: 999,
-                    background: '#EFF6FF', color: '#2563EB',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 700, flex: '0 0 auto',
+          <div style={{
+            padding: '14px 16px', borderBottom: '1px solid var(--border)',
+            background: '#F8FAFE',
+          }}>
+            <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 12, fontWeight: 700, marginBottom: 2, color: '#64748B' }}>
+              {contentDays.length > 0 ? 'DAFTAR SESI' : 'SILABUS'}
+            </h3>
+            {mat && (
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', margin: 0, lineHeight: 1.3 }}>
+                {mat.title}
+              </p>
+            )}
+            {mat && mat.description && !editing && (
+              <div>
+                <div onClick={() => setDescOpen(!descOpen)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
+                    fontSize: 10.5, fontWeight: 700, color: '#64748B', marginTop: 10, marginBottom: 4,
+                    textTransform: 'uppercase', letterSpacing: '0.04em',
                   }}>
-                    {i + 1}
-                  </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E293B', lineHeight: 1.3 }}>
-                    {c.title || `Sesi ${i + 1}`}
-                  </span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ width: 11, height: 11, transition: 'transform 0.2s', transform: descOpen ? 'rotate(90deg)' : '' }}>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                  Deskripsi
                 </div>
+                {descOpen && (
+                  <p style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5, margin: '0 0 4px 0' }}>
+                    {mat.description}
+                  </p>
+                )}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </div>
+
+          <div style={{ flex: 1, overflow: 'auto', padding: '8px 8px' }}>
+            {!mat ? (
+              <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
+                Pilih materi dari daftar
+              </div>
+            ) : contentDays.length > 0 ? (
+              contentDays.map((c: any, i: number) => (
+                <div key={`day-${i}`}
+                  onClick={() => selectSession(i)}
+                  style={{
+                    padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
+                    marginBottom: 3, transition: 'all 0.12s',
+                    background: selectedIdx === i ? '#EFF6FF' : 'transparent',
+                    border: selectedIdx === i ? '1px solid #A8DFC1' : '1px solid transparent',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                      width: 22, height: 22, borderRadius: 999,
+                      background: '#EFF6FF', color: '#2563EB',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 700, flex: '0 0 auto',
+                    }}>
+                      {i + 1}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E293B', lineHeight: 1.3 }}>
+                      {c.title || `Sesi ${i + 1}`}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              (mat.syllabus || []).map((s: any, i: number) => (
+                <div key={`syl-${i}`}
+                  style={{
+                    padding: '9px 12px', borderRadius: 10,
+                    marginBottom: 3, transition: 'all 0.12s',
+                    background: 'transparent',
+                    border: '1px solid transparent',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                      width: 22, height: 22, borderRadius: 999,
+                      background: '#F0FDF4', color: '#16A34A',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 700, flex: '0 0 auto',
+                    }}>
+                      {s.day || i + 1}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E293B', lineHeight: 1.3 }}>
+                      {s.topic}
+                    </span>
+                  </div>
+                  {s.duration && (
+                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 2, marginLeft: 30 }}>
+                      {s.duration}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
 
         <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border)', background: '#F8FAFE' }}>
           <button onClick={() => push('/materials')}
@@ -302,7 +291,7 @@ export default function MaterialDetailPage() {
       </div>
 
       {/* ═══ Right: Detail ═══ */}
-      <div style={{ flex: 1, minWidth: 0, marginLeft: 16, overflow: 'auto' }}>
+      <div style={{ flex: 1, minWidth: 0, marginLeft: 16, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {loading ? (
           <div style={{ padding: 48, textAlign: 'center', color: '#64748B', fontSize: 14 }}>Memuat...</div>
         ) : !mat ? (
@@ -313,7 +302,7 @@ export default function MaterialDetailPage() {
             <p style={{ color: '#64748B', fontSize: 14 }}>Materi tidak ditemukan.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1, minHeight: 0 }}>
             {/* ── Title + Actions ── */}
             <div style={{
               background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
@@ -334,36 +323,6 @@ export default function MaterialDetailPage() {
                 </h2>
               )}
               <div style={{ display: 'flex', gap: 6, flex: '0 0 auto' }}>
-                {!editing && mat.file_url && (
-                  <button onClick={async () => {
-                    try {
-                      const res = await fetch(mat.file_url);
-                      const blob = await res.blob();
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${mat.title}.pptx`;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                      toast.success("Download PPTX dimulai");
-                    } catch { toast.error("Gagal download file"); }
-                  }}
-                    title="Download file PPTX asli"
-                    style={{
-                      padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                      border: '1px solid var(--border)', background: '#fff', cursor: 'pointer',
-                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#2563EB',
-                    }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    PPTX
-                  </button>
-                )}
                 {!editing && (
                   <button onClick={async () => {
                     if (!confirm(`Hapus materi "${mat?.title}"? Tindakan ini tidak bisa dibatalkan.`)) return;
@@ -396,39 +355,42 @@ export default function MaterialDetailPage() {
                     Hapus
                   </button>
                 )}
-                {!editing && (
-                  <button onClick={exportPptx} disabled={exporting}
-                    title="Simpan sebagai PPTX"
+                {!editing && mat?.file_url && (
+                  <a href={mat.file_url} target="_blank" rel="noopener noreferrer"
+                    title="Download PDF"
                     style={{
                       padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
                       border: '1px solid var(--border)', background: '#fff', cursor: 'pointer',
-                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#1E293B',
+                      display: 'inline-flex', alignItems: 'center', gap: 5, color: '#16A34A',
+                      textDecoration: 'none',
                     }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
-                      <line x1="12" y1="18" x2="12" y2="12" />
-                      <polyline points="9 15 12 18 15 15" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
                     </svg>
-                    {exporting ? "..." : "PPTX"}
+                    PDF
+                  </a>
+                )}
+                {!mat?.file_url && (
+                  <button onClick={toggleEdit}
+                    style={{
+                      padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                      border: 'none', cursor: 'pointer', color: '#fff',
+                      background: editing ? '#DC2626' : '#1E3A5F',
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                    }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
+                      {editing
+                        ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
+                        : <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>
+                      }
+                    </svg>
+                    {editing ? "Batal" : "Edit"}
                   </button>
                 )}
-                <button onClick={toggleEdit}
-                  style={{
-                    padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                    border: 'none', cursor: 'pointer', color: '#fff',
-                    background: editing ? '#DC2626' : '#1E3A5F',
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                  }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
-                    {editing
-                      ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
-                      : <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>
-                    }
-                  </svg>
-                  {editing ? "Batal" : "Edit"}
-                </button>
-                {editing && (
+                {editing && !mat?.file_url && (
                   <button onClick={saveChanges} disabled={saving}
                     className="btn btn-primary" style={{ padding: '7px 12px', fontSize: 12 }}>
                     {saving ? "..." : "Simpan"}
@@ -437,7 +399,7 @@ export default function MaterialDetailPage() {
               </div>
             </div>
 
-            {editing && (
+            {editing && !mat?.file_url && (
               <div style={{
                 background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
                 padding: 14, boxShadow: 'var(--shadow)',
@@ -455,7 +417,7 @@ export default function MaterialDetailPage() {
             )}
 
             {/* ── Event Usage (compact) ── */}
-            {!editing && (
+            {!editing && !mat?.file_url && (
               <div style={{
                 background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
                 padding: '14px 18px', boxShadow: 'var(--shadow)',
@@ -491,7 +453,7 @@ export default function MaterialDetailPage() {
             )}
 
             {/* ── Expanded event detail list ── */}
-            {!editing && eventExpanded && (
+            {!editing && !mat?.file_url && eventExpanded && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {eventStats.map((es) => (
                   <div key={es.event_id} style={{
@@ -543,7 +505,20 @@ export default function MaterialDetailPage() {
               </div>
             )}
 
-            {/* ── Content per Day ── */}
+            {/* ── PDF Viewer ── */}
+            {mat?.file_url && !editing ? (
+              <div style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
+                overflow: 'hidden', boxShadow: 'var(--shadow)', minHeight: 0,
+              }}>
+                <embed
+                  src={mat.file_url}
+                  type="application/pdf"
+                  style={{ width: '100%', flex: 1, border: 'none', minHeight: 0 }}
+                />
+              </div>
+            ) : (
             <div style={{
               background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
               padding: 18, boxShadow: 'var(--shadow)',
@@ -554,7 +529,13 @@ export default function MaterialDetailPage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flex: '0 0 auto' }}>
                 <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0 }}>
-                  {editing ? "Konten Materi" : selectedIdx !== null && contentDays[selectedIdx] ? `Sesi ${selectedIdx + 1}: ${contentDays[selectedIdx]?.title || ""}` : "Konten Materi"}
+                  {editing
+                    ? "Konten Materi"
+                    : contentDays.length > 0
+                      ? (selectedIdx !== null && contentDays[selectedIdx]
+                        ? `Sesi ${selectedIdx + 1}: ${contentDays[selectedIdx]?.title || ""}`
+                        : "Konten Materi")
+                      : "Rencana Pelatihan"}
                 </h3>
                 {editing && (
                   <button onClick={addContentDay} style={{
@@ -565,10 +546,39 @@ export default function MaterialDetailPage() {
                   </button>
                 )}
               </div>
-              {(editing ? editContent : contentDays).length === 0 ? (
-                <p style={{ color: '#64748B', fontSize: 13 }}>Belum ada konten.</p>
-              ) : editing ? (
-                // ── Edit mode: scroll within card ──
+
+              {/* ── Plan-only view (no content body) ── */}
+              {!editing && contentDays.length === 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {(mat.syllabus || []).map((s: any, i: number) => (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '12px 16px', borderRadius: 12,
+                      background: '#FAFAF8', border: '1px solid var(--border-2)',
+                    }}>
+                      <span style={{
+                        width: 28, height: 28, borderRadius: 999,
+                        background: '#F0FDF4', color: '#16A34A',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 700, flex: '0 0 auto',
+                      }}>{s.day || i + 1}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B', marginBottom: 2 }}>
+                          {s.topic}
+                        </div>
+                        {s.duration && (
+                          <div style={{ fontSize: 12, color: '#64748B' }}>
+                            {s.duration}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Edit mode ── */}
+              {(editing ? editContent : contentDays).length > 0 && editing && (
                 <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
                 {editContent.map((c: any, i: number) => (
                   <details key={i} style={{ marginBottom: 8 }} open={true}>
@@ -614,40 +624,47 @@ export default function MaterialDetailPage() {
                     </div>
                   </details>
                 ))}</div>
-              ) : selectedIdx !== null ? (
-                // ── View mode: show only selected day ──
-                (() => {
-                  const day = contentDays[selectedIdx];
-                  if (!day) return <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>;
-                  return (
-                    <div style={{
-                      padding: '16px 20px', borderRadius: 14,
-                      background: '#FAFAF8', border: '1px solid var(--border-2)',
-                      fontSize: 14, lineHeight: 1.7,
-                    }}>
-                      <div style={{
-                        display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
-                      }}>
-                        <span style={{
-                          width: 28, height: 28, borderRadius: 999,
-                          background: '#1E3A5F', color: '#fff',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 12, fontWeight: 700,
-                        }}>{day.day}</span>
-                        <span style={{ fontWeight: 700, fontSize: 16, color: '#1E293B' }}>
-                          {day.title || `Hari ${day.day}`}
-                        </span>
-                      </div>
-                      <div style={{ whiteSpace: 'pre-wrap', color: '#475569' }}>
-                        {typeof day.body === 'string' ? day.body : JSON.stringify(day.body)}
-                      </div>
-                    </div>
-                  );
-                })()
-              ) : (
-                <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>
+              )}
+
+              {/* ── View mode with content ── */}
+              {!editing && contentDays.length > 0 && (
+                <>
+                  {selectedIdx !== null ? (
+                    (() => {
+                      const day = contentDays[selectedIdx];
+                      if (!day) return <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>;
+                      return (
+                        <div style={{
+                          padding: '16px 20px', borderRadius: 14,
+                          background: '#FAFAF8', border: '1px solid var(--border-2)',
+                          fontSize: 14, lineHeight: 1.7,
+                        }}>
+                          <div style={{
+                            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                          }}>
+                            <span style={{
+                              width: 28, height: 28, borderRadius: 999,
+                              background: '#1E3A5F', color: '#fff',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: 12, fontWeight: 700,
+                            }}>{day.day}</span>
+                            <span style={{ fontWeight: 700, fontSize: 16, color: '#1E293B' }}>
+                              {day.title || `Hari ${day.day}`}
+                            </span>
+                          </div>
+                          <div style={{ whiteSpace: 'pre-wrap', color: '#475569' }}>
+                            {typeof day.body === 'string' ? day.body : JSON.stringify(day.body)}
+                          </div>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <p style={{ color: '#64748B', fontSize: 13 }}>Pilih sesi dari sidebar.</p>
+                  )}
+                </>
               )}
             </div>
+            )}
           </div>
         )}
       </div>

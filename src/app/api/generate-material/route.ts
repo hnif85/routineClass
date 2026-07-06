@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
 
 async function callDeepSeek(system: string, user: string) {
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) {
-    // Return mock data so the UI is testable without a key
     console.warn("[generate-material] No DEEPSEEK_API_KEY — returning mock");
     return null;
   }
@@ -23,8 +23,9 @@ async function callDeepSeek(system: string, user: string) {
         { role: "user", content: user },
       ],
       temperature: 0.7,
-      max_tokens: 8192,
+      max_tokens: 4096,
     }),
+    signal: AbortSignal.timeout(30000),
   });
 
   if (!res.ok) {
@@ -43,6 +44,15 @@ interface GenerateRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const token = req.cookies.get("session")?.value;
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+  const { payload } = await jwtVerify(token, secret);
+  const role = (payload as any).role as string;
+  if (!["admin", "super_admin", "perusahaan", "pemateri"].includes(role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { checkRateLimit, getClientIp, LIMITS } = await import("@/lib/rate-limit");
   const ip = getClientIp(req);
   const rl = checkRateLimit({ ...LIMITS.ai, identifier: `ai:${ip}` });
@@ -56,71 +66,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Topik harus diisi minimal 3 karakter" }, { status: 400 });
     }
 
-    // ── Step 1: Generate material content ──
-    const materialPrompt = `Anda adalah asisten pembuat materi pelatihan UMKM Indonesia yang sangat ketat terhadap akurasi data. Tugas Anda adalah membuat HANDBOOK LENGKAP untuk peserta pelatihan — bukan sekadar outline.
+    const planPrompt = `Anda adalah perancang kurikulum pelatihan UMKM Indonesia. Buatlah RENCANA PELATIHAN (bukan materi lengkap) berdasarkan topik berikut.
 
 Topik: "${topic}"
 Tingkat: ${level}
-Jumlah hari pelatihan: ${days}
+Jumlah sesi: ${days}
 
-INSTRUKSI KETAT:
-1. LAKUKAN RISET internal Anda untuk setiap fakta/angka/statistik yang disebutkan. Gunakan data yang benar, akurat, dan terkini (tahun 2024-2026). JANGAN membuat data palsu.
-2. Jika tidak yakin dengan suatu data, jangan menyebutkan angka spesifik — gunakan pernyataan kualitatif seperti "banyak UMKM mengalami..."
-3. Setiap sesi harus berisi: penjelasan konsep, data/statistik relevan (hanya jika yakin), contoh nyata/kontekstual Indonesia, langkah praktis yang bisa dilakukan peserta, dan kesimpulan.
-4. Minimal 800 kata per sesi (bukan 500). Handbook harus benar-benar lengkap dan siap cetak.
-5. Bahasa Indonesia formal namun mudah dipahami pelaku UMKM.
-6. Contoh dan studi kasus harus kontekstual Indonesia (UKM batik, kuliner, fashion, agribisnis, dll).
+Buat silabus/outline yang mencakup:
+- Judul pelatihan yang profesional
+- Deskripsi singkat (2-3 kalimat)
+- Silabus per sesi: topik dan durasi
 
-Format output JSON WAJIB (HANYA JSON, tanpa markdown, tanpa penjelasan lain):
+Format JSON WAJIB (HANYA JSON, tanpa markdown):
 {
-  "title": "Judul materi yang profesional dan menarik",
-  "description": "Deskripsi singkat materi (2-3 kalimat) yang menjelaskan apa yang akan dipelajari peserta",
+  "title": "Judul pelatihan",
+  "description": "Deskripsi singkat",
   "syllabus": [
-    { "day": 1, "topic": "Judul sesi hari 1", "duration": "durasi dalam jam (misal: 2 jam)" }
-  ],
-  "content": [
-    {
-      "day": 1,
-      "title": "Judul sesi hari 1",
-      "body": "Handbook lengkap untuk sesi ini. Minimal 800 kata. Gunakan format: ## Sub-Judul untuk setiap bagian. Sertakan bullet points untuk poin penting. Akhiri dengan ## Rangkuman dan ## Tugas Praktis."
-    }
+    { "day": 1, "topic": "Topik sesi 1", "duration": "durasi (misal: 2 jam)" }
   ]
 }
 
-PASTIKAN:
-- Setiap data/statistik yang disebutkan adalah HASIL RISET, bukan karangan
-- Jumlah sesi = ${days} hari (jika days=1, hanya 1 sesi)
-- Materi relevan dengan konteks UMKM Indonesia
-- Siap digunakan sebagai bahan ajar cetak/digital`;
+Jangan buat konten/handbook lengkap — cukup rencana pelatihan saja.`;
 
-    let materialRaw = await callDeepSeek("Anda adalah ahli pembuatan materi pelatihan UMKM Indonesia yang mengutamakan akurasi data dan riset.", materialPrompt);
+    let planRaw = await callDeepSeek("Anda adalah perancang kurikulum pelatihan UMKM Indonesia.", planPrompt);
 
-    // Mock fallback if no API key
-    if (!materialRaw) {
-      materialRaw = JSON.stringify(getMockMaterial(topic, days, level));
+    if (!planRaw) {
+      planRaw = JSON.stringify(getMockPlan(topic, days, level));
     }
 
-    // Parse JSON from response (handle markdown wrapping)
-    const cleaned = materialRaw.replace(/```json\s*/gi, "").replace(/```\s*$/g, "").trim();
-    const material = JSON.parse(cleaned);
+    const cleaned = planRaw.replace(/```json\s*/gi, "").replace(/```\s*$/g, "").trim();
+    const plan = JSON.parse(cleaned);
 
-    // ── Step 2: Generate pre/post test questions ──
-    const testPrompt = `Berdasarkan materi pelatihan "${topic}" tingkat ${level} berikut, buatlah soal pre-test dan post-test.
+    const testPrompt = `Berdasarkan topik pelatihan "${topic}" tingkat ${level}, buatlah soal pre-test dan post-test.
 
 INSTRUKSI KETAT:
-1. Pre-test: 5 soal pilihan ganda yang mengukur PENGETAHUAN DASAR sebelum pelatihan (pertanyaan umum seputar topik).
-2. Post-test: 5 soal pilihan ganda yang mengukur PEMAHAMAN SETELAH BELAJAR (pertanyaan spesifik dari isi materi).
+1. Pre-test: 5 soal pilihan ganda yang mengukur PENGETAHUAN DASAR sebelum pelatihan.
+2. Post-test: 5 soal pilihan ganda yang mengukur PEMAHAMAN SETELAH BELAJAR.
 3. Setiap soal memiliki 4 opsi jawaban (A, B, C, D) dan SATU jawaban benar.
-4. Soal harus SPESIFIK dan detail, bukan pertanyaan umum/cliche.
-5. Jawaban yang benar harus tidak bisa ditebak dari opsi lain.
+4. Soal harus SPESIFIK, bukan pertanyaan umum/cliche.
 
 Format JSON WAJIB (HANYA JSON, tanpa teks lain):
 {
   "pre_test": [
-    { "question": "Teks pertanyaan spesifik?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 0, "points": 1 }
+    { "question": "Teks pertanyaan?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 0, "points": 1 }
   ],
   "post_test": [
-    { "question": "Teks pertanyaan spesifik?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 2, "points": 2 }
+    { "question": "Teks pertanyaan?", "options": ["A. opsi1", "B. opsi2", "C. opsi3", "D. opsi4"], "correct": 2, "points": 2 }
   ]
 }
 
@@ -137,39 +128,30 @@ Gunakan nomor index (0-based) untuk correct. Pre-test points=1, Post-test points
     }
 
     return NextResponse.json({
-      ...material,
+      ...plan,
       pre_test: tests.pre_test,
       post_test: tests.post_test,
     });
   } catch (err: any) {
     console.error("[generate-material] Error:", err);
     return NextResponse.json(
-      { error: err.message || "Gagal generate materi" },
+      { error: err.message || "Gagal generate rencana" },
       { status: 500 }
     );
   }
 }
 
-// ── Mock fallback (when no API key) ──
-
-function getMockMaterial(topic: string, days: number, level: string) {
-  const content = Array.from({ length: days }, (_, i) => ({
+function getMockPlan(topic: string, days: number, level: string) {
+  const syllabus = Array.from({ length: days }, (_, i) => ({
     day: i + 1,
-    title: `Hari ${i + 1}: ${topic} — Sesi ${i + 1}`,
-    body: `## ${topic} — Hari ${i + 1}\n\nPada sesi ini, peserta akan mempelajari aspek penting dari ${topic} yang relevan dengan usaha mereka.\n\n### Poin-Poin Penting:\n- Pengenalan konsep dasar ${topic}\n- Penerapan praktis untuk UMKM\n- Studi kasus dan contoh nyata\n- Tips dan trik implementasi\n\n### Latihan Praktis:\nPeserta diminta untuk menerapkan satu konsep ${topic} ke dalam usaha mereka dan mencatat hasilnya.\n\n### Kesimpulan:\n${topic} adalah keterampilan penting yang dapat membantu UMKM berkembang. Dengan latihan rutin, peserta akan semakin mahir.`,
-  }));
-
-  const syllabus = content.map(c => ({
-    day: c.day,
-    topic: c.title,
-    duration: `${1.5 + (c.day * 0.5)} jam`,
+    topic: `${topic} — Sesi ${i + 1}`,
+    duration: `${1.5 + (i * 0.5)} jam`,
   }));
 
   return {
     title: `${topic} untuk UMKM`,
-    description: `Materi pelatihan ${topic} tingkat ${level} yang dirancang khusus untuk pelaku UMKM Indonesia. Mencakup ${days} hari pembelajaran dengan pendekatan praktis.`,
+    description: `Rencana pelatihan ${topic} tingkat ${level} untuk pelaku UMKM Indonesia. ${days} sesi pembelajaran.`,
     syllabus,
-    content,
   };
 }
 

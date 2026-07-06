@@ -123,23 +123,21 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Verify WhatsApp webhook signature (Meta Cloud API)
-  // https://developers.facebook.com/docs/graph-api/webhooks/getting-started#validate-payloads
+  // Verify WhatsApp webhook signature — REQUIRED in production
   const appSecret = process.env.WHATSAPP_APP_SECRET;
-  if (appSecret) {
-    const signature = req.headers.get("x-hub-signature-256");
-    if (!signature) return NextResponse.json({ error: "Missing signature" }, { status: 401 });
-
-    const rawBody = await req.text();
-    const expected = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
-    if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-    // Re-parse body from raw
-    req = new NextRequest(req.url, { method: "POST", body: rawBody, headers: req.headers });
-  } else {
-    console.warn("[wa-webhook] WHATSAPP_APP_SECRET not set — skipping signature verification. Set this in production!");
+  if (!appSecret) {
+    console.error("[wa-webhook] WHATSAPP_APP_SECRET is required. Webhook rejected.");
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
+  const signature = req.headers.get("x-hub-signature-256");
+  if (!signature) return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+
+  const rawBody = await req.text();
+  const expected = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
+  if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+  req = new NextRequest(req.url, { method: "POST", body: rawBody, headers: req.headers });
 
   const supabase = await createServerSupabase();
 

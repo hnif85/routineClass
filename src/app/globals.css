@@ -188,6 +188,11 @@
   80%, 100% { transform: scale(2.4); opacity: 0; }
 }
 
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
 /* ───── Progress bar fills ───── */
 .fill-green {
   background: linear-gradient(90deg, #3B82F6, #2563EB);

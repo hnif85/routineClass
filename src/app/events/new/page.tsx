@@ -169,8 +169,30 @@ export default function NewEventPage() {
           <div><Label>Jam Selesai</Label><input type="time" value={f.end_time} onChange={e => setF({ ...f, end_time: e.target.value })} className={ic} /></div>
         </div>
 
+        <div>
+          <Label>Lokasi</Label>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+            {[
+              { label: 'SMESCO LABO', value: 'SMESCO LABO Lt. 3, Jakarta' },
+              { label: 'Kantor MWX', value: 'Kantor MWX Indonesia' },
+              { label: 'Online', value: 'Online (Zoom)' },
+              { label: 'Lainnya', value: '' },
+            ].map(v => (
+              <button type="button" key={v.value || 'other'} onClick={() => setF({ ...f, location: v.value })}
+                style={{
+                  padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: f.location === v.value ? '2px solid #2563EB' : '1.5px solid var(--border)',
+                  background: f.location === v.value ? '#EFF6FF' : '#fff',
+                  color: f.location === v.value ? '#2563EB' : '#475569',
+                }}>
+                {v.label}
+              </button>
+            ))}
+          </div>
+          <input value={f.location} onChange={e => setF({ ...f, location: e.target.value })} placeholder="Atau ketik manual..." className={ic} />
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          <div><Label>Lokasi</Label><input value={f.location} onChange={e => setF({ ...f, location: e.target.value })} placeholder="Hall MWX" className={ic} /></div>
+          <div />
           <div><Label>Kuota</Label><input type="number" value={f.quota} onChange={e => setF({ ...f, quota: e.target.value })} placeholder="50" className={ic} /></div>
         </div>
 

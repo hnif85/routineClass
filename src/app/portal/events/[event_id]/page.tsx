@@ -468,20 +468,20 @@ export default function PortalEventDetailPage() {
                       <div style={{ fontSize: 11, color: "#64748B" }}>
                         {m.total_days} hari
                         {m.is_ai_generated && " · AI-generated"}
-                        {m.file_url && " · 📎 Slide tersedia"}
+                        {m.file_url && " · 📎 File materi tersedia"}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6, flex: '0 0 auto' }}>
                       {m.file_url && (
                         <a href={m.file_url} target="_blank" rel="noopener"
                           onClick={e => e.stopPropagation()}
-                          title="Download slide presentasi"
+                          title="Download file materi"
                           style={{
                             display: 'inline-flex', alignItems: 'center', gap: 4,
                             padding: '5px 10px', background: '#2563EB', color: '#fff',
                             borderRadius: 8, fontSize: 11, fontWeight: 600, textDecoration: 'none',
                           }}>
-                          📥 Slide
+                          📥 PDF
                         </a>
                       )}
                       <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" style={{ width: 14, height: 14, flex: "0 0 auto", alignSelf: 'center' }}>
