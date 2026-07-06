@@ -63,13 +63,15 @@ export default function LoginPage() {
         width: '100%', maxWidth: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" alt=""
-            style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'contain', background: '#fff', padding: 6, marginBottom: 12 }} />
-          <h1 style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: '#1E293B', margin: 0 }}>
-            UMKM Connect
-          </h1>
-          <p style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>Masuk ke platform monitoring UMKM</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <img src="https://udupiblnzlzjmaafvdtv.supabase.co/storage/v1/object/public/umkmConnect/logo%20RoutineClass.png" alt="RC"
+              style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'contain' }} />
+            <h1 style={{ fontFamily: 'var(--font-sora)', fontSize: 22, fontWeight: 800, color: '#1E293B', margin: 0 }}>
+              RC
+            </h1>
+          </div>
+          <p style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>Masuk ke Dashboard Routine Class</p>
         </div>
 
         {error && (
