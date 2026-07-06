@@ -156,8 +156,8 @@ export default function MaterialsPage() {
   // ── Upload / Copy-Paste handlers ──
   async function handleFileSelect(file: File) {
     setUploadFileName(file.name);
-    // PPTX → auto-upload via API
-    if (file.name.match(/\.pptx?$/i)) {
+    // PPTX / PDF → auto-upload via API
+    if (file.name.match(/\.(pptx?|pdf)$/i)) {
       setUploadPptxLoading(true);
       setUploadPptxResult(null);
       const formData = new FormData();
@@ -168,10 +168,11 @@ export default function MaterialsPage() {
         if (json.success) {
           setUploadPptxResult(json);
           setUploadTitle(json.material.title);
-          toast.success(`PPTX diproses! ${json.material.slides} slide → ${json.test ? "Test siap" : "Tanpa test"}`);
+          const typeLabel = (json.file_type || "").toUpperCase();
+          toast.success(`${typeLabel} diproses! ${json.material.slides} halaman → ${json.test ? "Test siap" : "Tanpa test"}`);
           loadMaterials();
         } else {
-          toast.error(json.error || "Gagal upload PPTX");
+          toast.error(json.error || "Gagal upload file");
         }
       } catch (e: any) { toast.error("Error: " + e.message); }
       setUploadPptxLoading(false);
@@ -629,7 +630,7 @@ export default function MaterialsPage() {
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 4, display: 'block' }}>
                       Upload File
-                      <span style={{ fontWeight: 400, color: '#64748B' }}> (.pptx, .txt)</span>
+                      <span style={{ fontWeight: 400, color: '#64748B' }}> (.pptx, .pdf, .txt)</span>
                     </label>
                     <div style={{
                       border: '2px dashed var(--border)', borderRadius: 12, padding: 12,
@@ -647,7 +648,7 @@ export default function MaterialsPage() {
                       onClick={() => {
                         const input = document.createElement('input');
                         input.type = 'file';
-                        input.accept = '.pptx,.txt';
+                        input.accept = '.pptx,.pdf,.txt';
                         input.onchange = (e: any) => {
                           const file = e.target?.files?.[0];
                           if (file) handleFileSelect(file);
@@ -673,22 +674,22 @@ export default function MaterialsPage() {
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                           </svg>
-                          <span style={{ fontSize: 12.5, color: '#64748B' }}>Klik atau drag file .pptx / .txt di sini</span>
+                          <span style={{ fontSize: 12.5, color: '#64748B' }}>Klik atau drag file .pptx / .pdf / .txt di sini</span>
                         </div>
                       )}
                     </div>
                   </div>
-                  {/* ═══ PPTX LOADING ═══ */}
+                  {/* ═══ PPTX/PDF LOADING ═══ */}
                   {uploadPptxLoading && (
                     <div style={{ padding: 12, background: '#EFF6FF', borderRadius: 10, fontSize: 13, color: '#2563EB' }}>
-                      ⏳ Memproses PPTX... (ekstrak teks + buat materi + generate test)
+                      ⏳ Memproses file... (ekstrak teks + buat materi + generate test)
                     </div>
                   )}
 
-                  {/* ═══ PPTX SUCCESS ═══ */}
+                  {/* ═══ PPTX/PDF SUCCESS ═══ */}
                   {uploadPptxResult && (
                     <div style={{ padding: 14, background: '#F0FDF4', borderRadius: 10, border: '1px solid #BBF7D0' }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: '#166534', marginBottom: 8 }}>✅ PPTX Berhasil Diproses!</div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#166534', marginBottom: 8 }}>✅ File Berhasil Diproses!</div>
                       <div style={{ fontSize: 12, color: '#166534', lineHeight: 1.6 }}>
                         📄 <strong>{uploadPptxResult.material.title}</strong><br />
                         📊 {uploadPptxResult.material.slides} slide → {uploadPptxResult.material.slides} sesi<br />
