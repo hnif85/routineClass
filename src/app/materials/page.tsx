@@ -294,26 +294,26 @@ export default function MaterialsPage() {
       )}
 
       {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
         {filtered.map(m => (
           <div key={m.id} style={{
             background: '#fff', border: '1px solid var(--border)', borderRadius: 18,
-            padding: 18, boxShadow: 'var(--shadow)',
+            padding: '22px 22px 20px', boxShadow: 'var(--shadow)',
             transition: 'all 0.2s',
           }} className="card-hover">
             {/* Icon + badge */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{
-                width: 40, height: 40, borderRadius: 10,
+                width: 48, height: 48, borderRadius: 12,
                 background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                   <path d="M20 2v20H6.5A2.5 2.5 0 0 1 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H20Z" />
                 </svg>
               </div>
               <span style={{
-                fontSize: 9.5, fontWeight: 700, padding: '2px 6px', borderRadius: 5,
+                fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
                 background: m.is_ai_generated ? '#E7EEFB' : '#F0F2EC',
                 color: m.is_ai_generated ? '#3C68B5' : '#64748B',
               }}>
@@ -322,32 +322,32 @@ export default function MaterialsPage() {
             </div>
 
             {/* Title + desc */}
-            <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 15, fontWeight: 700, color: '#1E293B', marginBottom: 4, lineHeight: 1.3 }}>
+            <h3 style={{ fontFamily: 'var(--font-sora)', fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 6, lineHeight: 1.35 }}>
               {m.title}
             </h3>
             {m.description && (
-              <p style={{ fontSize: 12.5, color: '#475569', marginBottom: 10, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <p style={{ fontSize: 13, color: '#475569', marginBottom: 14, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {m.description}
               </p>
             )}
 
             {/* Meta */}
-            <div style={{ display: 'flex', gap: 10, fontSize: 11.5, color: '#64748B', marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#64748B', marginBottom: 18 }}>
               <span>{m.total_days || 1} hari</span>
               <span>{Array.isArray(m.content) ? m.content.length : 0} sesi</span>
               <span>{new Date(m.created_at).toLocaleDateString("id-ID")}</span>
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
               <Link href={`/materials/${m.id}`} className="btn" style={{
-                padding: '6px 12px', fontSize: 12, textDecoration: 'none', display: 'inline-block',
+                padding: '8px 16px', fontSize: 12.5, textDecoration: 'none', display: 'inline-block',
               }}>
                 Detail
               </Link>
               <button onClick={() => deleteMaterial(m.id, m.title)}
                 style={{
-                  padding: '6px 12px', fontSize: 12, borderRadius: 10,
+                  padding: '8px 16px', fontSize: 12.5, borderRadius: 10,
                   border: '1px solid #FCA5A5', background: '#fff', color: '#DC2626',
                   fontWeight: 600, cursor: 'pointer',
                 }}>
