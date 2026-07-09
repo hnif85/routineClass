@@ -5,7 +5,7 @@ import { jwtVerify } from "jose";
 async function extractPdfText(buffer: Buffer): Promise<{ title: string; fullText: string } | null> {
   try {
     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
+    (pdfjsLib.GlobalWorkerOptions as any).workerSrc = "";
 
     const doc = await pdfjsLib.getDocument({
       data: new Uint8Array(buffer),
