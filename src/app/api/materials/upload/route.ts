@@ -141,7 +141,9 @@ export async function POST(req: NextRequest) {
 
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/umkmConnect/materials/${fileName}`;
 
-    const title = result.title !== "Materi PDF" ? result.title : file.name.replace(/\.pdf$/i, "");
+    const title = result
+      ? (result.title !== "Materi PDF" ? result.title : file.name.replace(/\.pdf$/i, ""))
+      : file.name.replace(/\.pdf$/i, "");
 
     const syllabus = [{
       day: 1,
@@ -168,7 +170,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Gagal menyimpan materi: " + matErr?.message }, { status: 500 });
     }
 
-    const testData = result.fullText ? await generateTests(title, result.fullText) : null;
+    const testData = result?.fullText ? await generateTests(title, result.fullText) : null;
 
     let testId = null;
     if (testData) {
