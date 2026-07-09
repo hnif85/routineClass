@@ -103,3 +103,23 @@ export function dokuHeaders(requestId: string, requestTimestamp: string, request
     "Content-Type": "application/json",
   };
 }
+
+export function dokuHeadersGet(requestId: string, requestTimestamp: string, requestTarget: string) {
+  const component = [
+    `Client-Id:${DOKU_CLIENT_ID}`,
+    `Request-Id:${requestId}`,
+    `Request-Timestamp:${requestTimestamp}`,
+    `Request-Target:${requestTarget}`,
+  ].join("\n");
+
+  const hmac = createHmac("sha256", DOKU_SECRET_KEY)
+    .update(component)
+    .digest();
+
+  return {
+    "Client-Id": DOKU_CLIENT_ID,
+    "Request-Id": requestId,
+    "Request-Timestamp": requestTimestamp,
+    "Signature": `HMACSHA256=${Buffer.from(hmac).toString("base64")}`,
+  };
+}

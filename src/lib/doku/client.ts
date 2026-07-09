@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { getDokuApiBase, dokuHeaders, generateRequestTimestamp } from "./signature";
+import { getDokuApiBase, dokuHeaders, dokuHeadersGet, generateRequestTimestamp } from "./signature";
 
 interface CreatePaymentParams {
   amount: number;
@@ -18,6 +18,13 @@ interface PaymentResponse {
   sessionId: string;
   tokenId: string;
   expiredDate: string;
+}
+
+interface OrderStatus {
+  transactionStatus: string;
+  orderStatus: string;
+  amount: number;
+  invoiceNumber: string;
 }
 
 export async function createDokuPayment(params: CreatePaymentParams): Promise<PaymentResponse> {
@@ -84,5 +91,31 @@ export async function createDokuPayment(params: CreatePaymentParams): Promise<Pa
     sessionId: resp.order.session_id,
     tokenId: resp.payment.token_id,
     expiredDate: resp.payment.expired_date,
+  };
+}
+
+export async function checkDokuStatus(invoiceNumber: string): Promise<OrderStatus | null> {
+  const apiBase = getDokuApiBase();
+  const requestTarget = `/orders/v1/status/${invoiceNumber}`;
+  const requestId = randomUUID();
+  const requestTimestamp = generateRequestTimestamp();
+
+  const res = await fetch(`${apiBase}${requestTarget}`, {
+    method: "GET",
+    headers: dokuHeadersGet(requestId, requestTimestamp, requestTarget),
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    console.error("[doku/status] API error:", res.status);
+    return null;
+  }
+
+  const data = await res.json();
+  return {
+    transactionStatus: data.transaction?.status || "UNKNOWN",
+    orderStatus: data.order?.status || "UNKNOWN",
+    amount: data.order?.amount || 0,
+    invoiceNumber: data.order?.invoice_number || invoiceNumber,
   };
 }

@@ -9,12 +9,30 @@ const DOKU_JS = process.env.NEXT_PUBLIC_DOKU_SANDBOX === "true"
   ? "https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js"
   : "https://jokul.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js";
 
-function openDokuCheckout(url: string) {
+function openDokuCheckout(url: string, invoiceNumber?: string) {
   if (typeof window !== "undefined" && (window as any).loadJokulCheckout) {
     (window as any).loadJokulCheckout(url);
+    if (invoiceNumber) pollDokuStatus(invoiceNumber);
   } else {
     window.open(url, "_blank");
   }
+}
+
+function pollDokuStatus(invoiceNumber: string) {
+  let attempts = 0;
+  const maxAttempts = 60;
+  const interval = setInterval(async () => {
+    attempts++;
+    try {
+      const res = await fetch(`/api/pay/doku/status?invoice=${invoiceNumber}`);
+      const data = await res.json();
+      if (data.transactionStatus === "SUCCESS") {
+        clearInterval(interval);
+        window.location.href = "/portal";
+      }
+    } catch {}
+    if (attempts >= maxAttempts) clearInterval(interval);
+  }, 5000);
 }
 
 export default function DaftarPage() {
@@ -119,7 +137,7 @@ export default function DaftarPage() {
                 return;
               }
               if (data.payLink) {
-                openDokuCheckout(data.payLink);
+                openDokuCheckout(data.payLink, data.invoiceNumber);
               }
               push("/portal");
             } catch {
@@ -207,7 +225,7 @@ export default function DaftarPage() {
             return;
           }
           if (regData.payLink) {
-            openDokuCheckout(regData.payLink);
+            openDokuCheckout(regData.payLink, regData.invoiceNumber);
           }
           push("/portal");
           return;
@@ -237,7 +255,7 @@ export default function DaftarPage() {
             return;
           }
           if (regData.payLink) {
-            openDokuCheckout(regData.payLink);
+            openDokuCheckout(regData.payLink, regData.invoiceNumber);
           }
           push("/portal");
           return;
@@ -285,7 +303,7 @@ export default function DaftarPage() {
       if (data.redirect) {
         push(data.redirect);
       } else if (data.payLink) {
-        openDokuCheckout(data.payLink);
+        openDokuCheckout(data.payLink, data.invoiceNumber);
         push("/portal");
       } else {
         push("/portal");
