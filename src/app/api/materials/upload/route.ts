@@ -1,42 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import url from "url";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { jwtVerify } from "jose";
 
-async function extractPdfText(buffer: Buffer): Promise<{ title: string; fullText: string }> {
-  const pdfjsLib = await import(/* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs");
-  const workerPath = path.resolve(process.cwd(), "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = url.pathToFileURL(workerPath).href;
-
-  const doc = await pdfjsLib.getDocument({
-    data: new Uint8Array(buffer),
-    useWorkerFetch: false,
-    isEvalSupported: false,
-    disableFontFace: true,
-    useSystemFonts: false,
-    enableXfa: false,
-  } as any).promise;
-
-  const totalPages = doc.numPages;
-  let pdfTitle = "Materi PDF";
-  const texts: string[] = [];
-
+async function extractPdfText(buffer: Buffer): Promise<{ title: string; fullText: string } | null> {
   try {
-    const metadata = await doc.getMetadata();
-    const info = metadata?.info as Record<string, any> | undefined;
-    if (info?.Title) pdfTitle = info.Title;
-  } catch {}
+    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
 
-  for (let i = 1; i <= totalPages; i++) {
-    const page = await doc.getPage(i);
-    const textContent = await page.getTextContent();
-    const text = textContent.items.map((item: any) => item.str || "").join(" ");
-    if (text.trim()) texts.push(text.trim());
+    const doc = await pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+      useWorkerFetch: false,
+      isEvalSupported: false,
+      disableFontFace: true,
+      useSystemFonts: false,
+      enableXfa: false,
+    } as any).promise;
+
+    const totalPages = doc.numPages;
+    let pdfTitle = "Materi PDF";
+    const texts: string[] = [];
+
+    try {
+      const metadata = await doc.getMetadata();
+      const info = metadata?.info as Record<string, any> | undefined;
+      if (info?.Title) pdfTitle = info.Title;
+    } catch {}
+
+    for (let i = 1; i <= totalPages; i++) {
+      const page = await doc.getPage(i);
+      const textContent = await page.getTextContent();
+      const text = textContent.items.map((item: any) => item.str || "").join(" ");
+      if (text.trim()) texts.push(text.trim());
+    }
+
+    await doc.destroy();
+    return { title: pdfTitle, fullText: texts.join("\n\n") };
+  } catch (err: any) {
+    console.error("[materials/upload] PDF extraction failed:", err.message);
+    return null;
   }
-
-  await doc.destroy();
-  return { title: pdfTitle, fullText: texts.join("\n\n") };
 }
 
 async function generateTests(materialTitle: string, content: string) {
