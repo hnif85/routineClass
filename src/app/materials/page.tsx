@@ -113,17 +113,36 @@ export default function MaterialsPage() {
     if (!uploadFile) { toast.error("Pilih file PDF"); return; }
     setUploadProgress(true);
     setUploadResult(null);
-    const formData = new FormData();
-    formData.append("file", uploadFile);
+
     try {
-      const res = await fetch("/api/materials/upload", { method: "POST", body: formData });
-      const json = await res.json();
+      const res1 = await fetch("/api/materials/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: uploadFile.name }),
+      });
+      const { signedUrl, filePath } = await res1.json();
+      if (!signedUrl) { toast.error("Gagal dapat upload URL"); setUploadProgress(false); return; }
+
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        body: uploadFile,
+        headers: { "Content-Type": "application/pdf" },
+      });
+      if (!uploadRes.ok) { toast.error("Gagal upload file"); setUploadProgress(false); return; }
+
+      const res2 = await fetch("/api/materials/process-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_path: filePath, original_name: uploadFile.name }),
+      });
+      const json = await res2.json();
+
       if (json.success) {
         setUploadResult(json);
-        toast.success(`PDF diproses!`);
+        toast.success("PDF diproses!");
         loadMaterials();
       } else {
-        toast.error(json.error || "Gagal upload");
+        toast.error(json.error || "Gagal proses");
       }
     } catch (e: any) {
       toast.error("Error: " + e.message);
