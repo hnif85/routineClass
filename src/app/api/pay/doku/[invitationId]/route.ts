@@ -22,7 +22,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ in
       return NextResponse.json({ error: "Pendaftaran tidak ditemukan" }, { status: 404 });
     }
 
-    if (inv.status === "confirmed" || inv.payment_status === "paid") {
+    if (inv.status === "confirmed" || inv.status === "rsvp_yes") {
       return NextResponse.json({ error: "Sudah dikonfirmasi" }, { status: 400 });
     }
 
@@ -32,8 +32,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ in
       return NextResponse.json({ error: "Event ini gratis" }, { status: 400 });
     }
 
-    const name = (inv.full_name || inv.umkm?.full_name || "Peserta").replace(/[^a-zA-Z0-9\s\-.,]/g, "").slice(0, 255);
-    const email = (inv.email || "").replace(/[^a-zA-Z0-9@.\-+_]/g, "").slice(0, 128);
+    const name = (inv.full_name || inv.umkm?.full_name || "Peserta").slice(0, 255);
+    const email = (inv.email || "").slice(0, 128);
     const wa = (inv.phone_number || inv.umkm?.whatsapp || "").replace(/[^0-9+]/g, "").slice(0, 16);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -56,9 +56,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ in
       status: "pending",
     }).eq("id", inv.id);
 
-    return NextResponse.json({ payLink: payment.paymentUrl, invoiceNumber });
+    return NextResponse.json({ paymentUrl: payment.paymentUrl, invoiceNumber });
   } catch (err: any) {
-    console.error("[pay] Error:", err.message);
-    return NextResponse.json({ error: "Gagal membuat link pembayaran" }, { status: 500 });
+    console.error("[pay/doku] Error:", err.message);
+    return NextResponse.json({ error: "Gagal membuat pembayaran" }, { status: 500 });
   }
 }

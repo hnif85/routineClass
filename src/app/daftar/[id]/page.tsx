@@ -2,7 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Script from "next/script";
 import { createClient } from "@/lib/supabase/client";
+
+const DOKU_JS = process.env.NEXT_PUBLIC_DOKU_SANDBOX === "true"
+  ? "https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js"
+  : "https://jokul.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js";
+
+function openDokuCheckout(url: string) {
+  if (typeof window !== "undefined" && (window as any).loadJokulCheckout) {
+    (window as any).loadJokulCheckout(url);
+  } else {
+    window.open(url, "_blank");
+  }
+}
 
 export default function DaftarPage() {
   const eventId = useParams().id as string;
@@ -106,7 +119,7 @@ export default function DaftarPage() {
                 return;
               }
               if (data.payLink) {
-                window.open(data.payLink, "_blank");
+                openDokuCheckout(data.payLink);
               }
               push("/portal");
             } catch {
@@ -194,7 +207,7 @@ export default function DaftarPage() {
             return;
           }
           if (regData.payLink) {
-            window.open(regData.payLink, "_blank");
+            openDokuCheckout(regData.payLink);
           }
           push("/portal");
           return;
@@ -224,7 +237,7 @@ export default function DaftarPage() {
             return;
           }
           if (regData.payLink) {
-            window.open(regData.payLink, "_blank");
+            openDokuCheckout(regData.payLink);
           }
           push("/portal");
           return;
@@ -272,7 +285,7 @@ export default function DaftarPage() {
       if (data.redirect) {
         push(data.redirect);
       } else if (data.payLink) {
-        window.open(data.payLink, "_blank");
+        openDokuCheckout(data.payLink);
         push("/portal");
       } else {
         push("/portal");
@@ -363,6 +376,7 @@ export default function DaftarPage() {
         )}
 
       </div>
+      <Script src={DOKU_JS} strategy="afterInteractive" />
     </div>
   );
 }
